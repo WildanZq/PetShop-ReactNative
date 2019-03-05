@@ -62,6 +62,8 @@ export default class HomeScreen extends React.Component {
     this.unsubscribe = null;
     this.state = {
       isLoading: true,
+      foto: null,
+      nama: null,
       boards: []
     };
   }
@@ -86,6 +88,12 @@ export default class HomeScreen extends React.Component {
 
   componentDidMount() {
     this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        console.log(user);
+        this.setState({ foto: user.photoURL, nama: user.name });
+      }
+   });
   }
 
   _renderItem = ({item}) => (
@@ -119,7 +127,7 @@ export default class HomeScreen extends React.Component {
   };
 
   _signOutAsync = async () => {
-    await AsyncStorage.clear();
+    firebase.auth().signOut();
     this.props.navigation.navigate('Auth');
   };
 
@@ -213,6 +221,8 @@ export default class HomeScreen extends React.Component {
           <View>
             <Button primary onPress={this._signOutAsync}><Text> Actually, sign me out :) </Text></Button>
             <Text>{"\n"}Recommended for you{"\n"}</Text>
+            <Text>{this.state.name}</Text>
+            <Image style={{ width: 50, height: 50 }} source={{ uri: this.state.foto }} />
           </View>
 
           <FlatList
