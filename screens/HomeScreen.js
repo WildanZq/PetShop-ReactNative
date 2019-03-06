@@ -8,7 +8,8 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
-  FlatList
+  FlatList,
+  AsyncStorage
 } from "react-native";
 
 import { Col, Row, Grid } from "react-native-easy-grid";
@@ -33,8 +34,9 @@ import { Dimensions } from "react-native";
 const DeviceWidth = Dimensions.get("window").width;
 
 import { MonoText } from "../components/StyledText";
-import firebase from "../Firebase";
 import Swiper from 'react-native-swiper';
+
+import firebase from "../Firebase";
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
@@ -56,10 +58,17 @@ export default class HomeScreen extends React.Component {
   };
   constructor() {
     super();
+    this.state = {
+       namaFb: ''
+    }
+
+
     this.ref = firebase.firestore().collection("boards");
     this.unsubscribe = null;
     this.state = {
       isLoading: true,
+      foto: null,
+      nama: null,
       boards: []
     };
   }
@@ -84,7 +93,28 @@ export default class HomeScreen extends React.Component {
 
   componentDidMount() {
     this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        AsyncStorage.getItem('userToken', (error, result) => {
+            if (result) {
+                fetch(`https://graph.facebook.com/me?access_token=${result}`)
+                .then(response => response.json())
+                .then((response) => {
+                  this.setState({
+                    namaFb: `${response.name}`
+                  });
+                })
+                .catch(error => console.log(error));
+            }
+        });
+        this.setState({ foto: user.photoURL, nama: 'awe' });
+      }
+   });
   }
+
+  componentWillUnmount() {
+    this.isCancelled = true;
+}
 
   _renderItem = ({item}) => (
     <Content>
@@ -111,6 +141,16 @@ export default class HomeScreen extends React.Component {
     </Card>
     </Content>
   );
+
+  _showMoreApp = () => {
+    this.props.navigation.navigate('Other');
+  };
+
+  _signOutAsync = async () => {
+    await AsyncStorage.clear();
+    firebase.auth().signOut();
+    this.props.navigation.navigate('AuthLoading');
+  };
 
   render() {
     if (this.state.isLoading) {
@@ -139,6 +179,7 @@ export default class HomeScreen extends React.Component {
               </View>
             </Swiper>
         </View>
+
           <Card
             style={{
               flexDirection: "row",
@@ -198,10 +239,11 @@ export default class HomeScreen extends React.Component {
             </View>
           </Card>
 
-          <View style={styles.footer}>
-            <View>
-              <Text>{"\n"}Recommended for you{"\n"}</Text>
-            </View>
+          <View>
+            <Button primary onPress={this._signOutAsync}><Text> Actually, sign me out :) </Text></Button>
+            <Text>{"\n"}Recommended for you{"\n"}</Text>
+            <Text>{this.state.namaFb}</Text>
+            <Image style={{ width: 50, height: 50 }} source={{ uri: this.state.foto }} />
           </View>
 
           <FlatList
@@ -252,15 +294,6 @@ export default class HomeScreen extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingBottom: 22
-  },
-  item: {
-    padding: 10,
-    fontSize: 18,
-    height: 44
-  },
   activity: {
     position: "absolute",
     left: 0,
