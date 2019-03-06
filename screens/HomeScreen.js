@@ -34,6 +34,7 @@ import { Dimensions } from "react-native";
 const DeviceWidth = Dimensions.get("window").width;
 
 import { MonoText } from "../components/StyledText";
+
 import Swiper from 'react-native-swiper';
 
 import firebase from "../Firebase";
@@ -45,7 +46,7 @@ export default class HomeScreen extends React.Component {
           <Grid>
             <Row>
             <Col style={{width:80, marginTop:18}}><Text> LOGO</Text></Col>
-            <Col style={{}}>
+            <Col>
               <Item rounded style={{marginTop:9, width:195, height:36}}>
                 <Input placeholder='Search'/>
               </Item>
@@ -58,17 +59,12 @@ export default class HomeScreen extends React.Component {
   };
   constructor() {
     super();
-    this.state = {
-       namaFb: ''
-    }
-
-
     this.ref = firebase.firestore().collection("boards");
     this.unsubscribe = null;
     this.state = {
       isLoading: true,
-      foto: null,
-      nama: null,
+      userAuth: null,
+      userFb: '',
       boards: []
     };
   }
@@ -97,24 +93,25 @@ export default class HomeScreen extends React.Component {
       if (user) {
         AsyncStorage.getItem('userToken', (error, result) => {
             if (result) {
-                fetch(`https://graph.facebook.com/me?access_token=${result}`)
+                fetch(`https://graph.facebook.com/me?fields=birthday,email,gender&metadata=1&access_token=${result}`)
                 .then(response => response.json())
                 .then((response) => {
                   this.setState({
-                    namaFb: `${response.name}`
+                    userFb: response
                   });
                 })
                 .catch(error => console.log(error));
             }
         });
-        this.setState({ foto: user.photoURL, nama: 'awe' });
+
+        this.setState({ userAuth: user });
       }
    });
   }
 
   componentWillUnmount() {
     this.isCancelled = true;
-}
+  }
 
   _renderItem = ({item}) => (
     <Content>
@@ -134,17 +131,13 @@ export default class HomeScreen extends React.Component {
       <CardItem>
         <Left>
         <Body>
-          <Text note>{item.title}</Text>
+          <Text note>{item.key}</Text>
         </Body>
         </Left>
       </CardItem>
     </Card>
     </Content>
   );
-
-  _showMoreApp = () => {
-    this.props.navigation.navigate('Other');
-  };
 
   _signOutAsync = async () => {
     await AsyncStorage.clear();
@@ -242,8 +235,8 @@ export default class HomeScreen extends React.Component {
           <View>
             <Button primary onPress={this._signOutAsync}><Text> Actually, sign me out :) </Text></Button>
             <Text>{"\n"}Recommended for you{"\n"}</Text>
-            <Text>{this.state.namaFb}</Text>
-            <Image style={{ width: 50, height: 50 }} source={{ uri: this.state.foto }} />
+            <Text>{this.state.userFb.email}</Text>
+            <Image style={{ width: 50, height: 50 }} source={{ uri: this.state.userAuth.photoURL }} />
           </View>
 
           <FlatList
@@ -252,7 +245,6 @@ export default class HomeScreen extends React.Component {
             horizontal={false}
             numColumns={2}
           />
-
       </ScrollView>
     );
   }
