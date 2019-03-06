@@ -1,3 +1,7 @@
+// INI CONTOH GIT DALAM MANAJEMEN FILE YANG DIUBAH
+// HALOOOOO DUNIA
+// TEST TEST TEST
+
 import React, { Component } from "react";
 import {
   Image,
