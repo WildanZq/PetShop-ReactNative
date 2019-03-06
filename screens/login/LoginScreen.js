@@ -50,14 +50,16 @@ export default class LoginScreen extends React.Component {
         await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);  // Set persistent auth state
         const credential = firebase.auth.FacebookAuthProvider.credential(token);
         const facebookProfileData = await firebase.auth().signInAndRetrieveDataWithCredential(credential);  // Si
-        
+
         const response = await fetch(`https://graph.facebook.com/me?access_token=${token}`);
+        await AsyncStorage.setItem('userToken', token);
+        
         Alert.alert('Logged in!', `Hi ${(await response.json()).name}!`);
 
-        this.props.navigation.navigate('App');
+        this.props.navigation.navigate('AuthLoading');
       }
       case 'cancel': {
-        return Promise.reject({type: 'cancel'});
+
       }
     }
   };

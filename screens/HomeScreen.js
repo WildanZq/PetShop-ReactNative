@@ -58,6 +58,11 @@ export default class HomeScreen extends React.Component {
   };
   constructor() {
     super();
+    this.state = {
+       namaFb: ''
+    }
+
+
     this.ref = firebase.firestore().collection("boards");
     this.unsubscribe = null;
     this.state = {
@@ -90,11 +95,26 @@ export default class HomeScreen extends React.Component {
     this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        console.log(user);
-        this.setState({ foto: user.photoURL, nama: user.name });
+        AsyncStorage.getItem('userToken', (error, result) => {
+            if (result) {
+                fetch(`https://graph.facebook.com/me?access_token=${result}`)
+                .then(response => response.json())
+                .then((response) => {
+                  this.setState({
+                    namaFb: `${response.name}`
+                  });
+                })
+                .catch(error => console.log(error));
+            }
+        });
+        this.setState({ foto: user.photoURL, nama: 'awe' });
       }
    });
   }
+
+  componentWillUnmount() {
+    this.isCancelled = true;
+}
 
   _renderItem = ({item}) => (
     <Content>
@@ -127,8 +147,9 @@ export default class HomeScreen extends React.Component {
   };
 
   _signOutAsync = async () => {
+    await AsyncStorage.clear();
     firebase.auth().signOut();
-    this.props.navigation.navigate('Auth');
+    this.props.navigation.navigate('AuthLoading');
   };
 
   render() {
@@ -221,7 +242,7 @@ export default class HomeScreen extends React.Component {
           <View>
             <Button primary onPress={this._signOutAsync}><Text> Actually, sign me out :) </Text></Button>
             <Text>{"\n"}Recommended for you{"\n"}</Text>
-            <Text>{this.state.name}</Text>
+            <Text>{this.state.namaFb}</Text>
             <Image style={{ width: 50, height: 50 }} source={{ uri: this.state.foto }} />
           </View>
 
