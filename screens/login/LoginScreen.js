@@ -36,7 +36,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   inputContainer: {
-    borderBottomColor: '#A2A2A2'
+    borderBottomColor: '#A2A2A2',
+    height: 25,
+    paddingHorizontal: 2,
+  },
+  inputLabel: {
+    fontFamily: "Roboto",
+    fontSize: 14,
+    fontWeight: "100",
+  },
+  inputStyle: {
+    fontFamily: "Roboto",
+    fontSize: 14,
   },
   form: {
     width: 0.85 * deviceWidth,
@@ -60,13 +71,8 @@ const styles = StyleSheet.create({
     fontWeight: '300',
     color: 'white'
   },
-  inputLabel: {
-    fontFamily: "Roboto",
-    fontSize: 14,
-    fontWeight: "100",
-  },
   button: {
-    marginTop: 20,
+    marginTop: 25,
     borderRadius: 10,
     width: 200,
     paddingVertical: 10,
@@ -80,7 +86,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   divider: {
-    marginVertical: 20,
+    marginVertical: 25,
     backgroundColor: '#A2A2A2',
     height: StyleSheet.hairlineWidth,
     width: 0.35 * deviceWidth,
@@ -92,7 +98,7 @@ const styles = StyleSheet.create({
     fontSize: 12
   },
   signupView: {
-    marginTop: 25,
+    marginTop: 30,
   },
   signupText: {
     fontFamily: "Roboto",
@@ -108,11 +114,11 @@ export default class LoginScreen extends React.Component {
   constructor() {
     super();
     this.ref = firebase.firestore().collection('user');
+    this.state = { text: 'Useless Placeholder' };
   }
-  
+
   state = {
     fontLoaded: false,
-    enteredText: "",
   };
 
   static navigationOptions = {
@@ -150,6 +156,7 @@ export default class LoginScreen extends React.Component {
                 placeholder="john@example.com"
                 inputContainerStyle={ [styles.inputContainer] }
                 containerStyle={{marginTop: 10}}
+                inputStyle={styles.inputStyle}
                 labelStyle={[styles.inputLabel]}/>
               <Input
                 secureTextEntry={true}
@@ -158,6 +165,7 @@ export default class LoginScreen extends React.Component {
                 placeholder="Password"
                 inputContainerStyle={ [styles.inputContainer] }
                 containerStyle={{marginTop: 20}}
+                inputStyle={styles.inputStyle}
                 labelStyle={[styles.inputLabel]}/>
               <Button
                 ViewComponent={LinearGradient}
@@ -219,12 +227,10 @@ export default class LoginScreen extends React.Component {
         const graphApi = `https://graph.facebook.com/v3.2/me?fields=id,name,birthday,email,gender&access_token=${token}`;
         const alertPrint = await fetch(graphApi);
 
-<<<<<<< HEAD
         const response = await fetch(`https://graph.facebook.com/me?access_token=${token}`);
         await AsyncStorage.setItem('userToken', token);
 
         Alert.alert('Logged in!', `Hi ${(await response.json()).name}!`);
-=======
         await AsyncStorage.setItem('userToken', token); //set Token disimpan di AsyncStorage
         firebase.auth().onAuthStateChanged((user) => {
           if (user) {
@@ -252,7 +258,6 @@ export default class LoginScreen extends React.Component {
             });
           }
        });
->>>>>>> 974c914331b47783ec111faa570f1f291e13a8e8
 
         Alert.alert('Logged in!', `Hi ${(await alertPrint.json()).name}!`);
         this.props.navigation.navigate('AuthLoading');
