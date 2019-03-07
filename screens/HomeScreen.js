@@ -1,7 +1,3 @@
-// INI CONTOH GIT DALAM MANAJEMEN FILE YANG DIUBAH
-// HALOOOOO DUNIA
-// TEST TEST TEST
-
 import React, { Component } from "react";
 import {
   Image,
@@ -97,7 +93,7 @@ export default class HomeScreen extends React.Component {
       if (user) {
         AsyncStorage.getItem('userToken', (error, result) => {
             if (result) {
-                fetch(`https://graph.facebook.com/me?fields=birthday,email,gender&metadata=1&access_token=${result}`)
+                fetch(`https://graph.facebook.com/v3.2/me?fields=id,birthday,email,gender,address&access_token=${result}`)
                 .then(response => response.json())
                 .then((response) => {
                   this.setState({
@@ -239,7 +235,7 @@ export default class HomeScreen extends React.Component {
           <View>
             <Button primary onPress={this._signOutAsync}><Text> Actually, sign me out :) </Text></Button>
             <Text>{"\n"}Recommended for you{"\n"}</Text>
-            <Text>{this.state.userFb.email}</Text>
+            <Text>{this.state.userFb.birthday}</Text>
             <Image style={{ width: 50, height: 50 }} source={{ uri: this.state.userAuth.photoURL }} />
           </View>
 
