@@ -28,6 +28,8 @@ import {
 import firebase from "../../Firebase";
 import { LinearGradient } from 'expo';
 
+import Spinner from '../../components/common/Spinner';
+
 const deviceWidth = Dimensions.get('window').width;
 const deviceHeight = Dimensions.get('window').height;
 const styles = StyleSheet.create({
@@ -44,10 +46,11 @@ const styles = StyleSheet.create({
     fontFamily: "Roboto",
     fontSize: 14,
     fontWeight: "100",
+    marginBottom: 5
   },
   inputStyle: {
     fontFamily: "Roboto",
-    fontSize: 14,
+    fontSize: 14
   },
   form: {
     width: 0.85 * deviceWidth,
@@ -117,9 +120,7 @@ export default class LoginScreen extends React.Component {
     this.state = { text: 'Useless Placeholder' };
   }
 
-  state = {
-    fontLoaded: false,
-  };
+  state = { fontLoaded: false, email: '', password: '', loading: false };
 
   static navigationOptions = {
     header: null,
@@ -147,40 +148,35 @@ export default class LoginScreen extends React.Component {
             <Image source={require('../../assets/images/pl-logo.png')} style={{ width: 100, height: 100, borderRadius: 15 }}/>
           </Row>
           <Row size={1} style={[styles.container]}>
-          <Text style={styles.loginText}>Sign In</Text>
+          <Text style={styles.loginText}>Pet Shop</Text>
           </Row>
           <Row size={6}  style={ [styles.container, { alignItems: 'flex-start'}] }>
             <View style={[ styles.form, {alignItems: 'center'} ]}>
               <Input
-                label='Username or Email'
+                value={this.state.email}
+                onChange={event => this.setState({ email: event.nativeEvent.text })}
+                keyboardType='email-address'
+                label='Email'
                 placeholder="john@example.com"
                 inputContainerStyle={ [styles.inputContainer] }
                 containerStyle={{marginTop: 10}}
                 inputStyle={styles.inputStyle}
                 labelStyle={[styles.inputLabel]}/>
               <Input
+                value={this.state.password}
+                onChange={event => this.setState({ password: event.nativeEvent.text })}
                 secureTextEntry={true}
                 autoCapitalize='none'
                 label='Password'
-                placeholder="Password"
+                placeholder="******"
                 inputContainerStyle={ [styles.inputContainer] }
                 containerStyle={{marginTop: 20}}
                 inputStyle={styles.inputStyle}
                 labelStyle={[styles.inputLabel]}/>
-              <Button
-                ViewComponent={LinearGradient}
-                linearGradientProps={{
-                  colors: ['#90F7EC', '#32CCBC'],
-                  start: { x: 0, y: 0 },
-                  end: { x: 1, y: 0 },
-                }}
-                title="Sign in"
-                buttonStyle={[styles.button]}
-                onPress={this._signInAsync}
-              />
+              { this.renderButton() }
               <View flexDirection="row" style={{alignItems: 'center'}}>
                 <View style={styles.divider}/>
-                <Text style={styles.dividerText}>OR</Text>
+                <Text style={styles.dividerText}>ATAU</Text>
                 <View style={styles.divider}/>
               </View>
               <Button
@@ -203,6 +199,55 @@ export default class LoginScreen extends React.Component {
         </Grid>
       </Container>
     );
+  }
+
+  renderButton() {
+    if (this.state.loading) {
+      return <Spinner size='small' />;
+    }
+
+    return (
+      <Button
+        ViewComponent={LinearGradient}
+        linearGradientProps={{
+          colors: ['#90F7EC', '#32CCBC'],
+          start: { x: 0, y: 0 },
+          end: { x: 1, y: 0 },
+        }}
+        title="Sign in"
+        buttonStyle={[styles.button]}
+        onPress={this._signInWithEmail}
+      />
+    );
+  }
+
+  _signInWithEmail = async () => {
+    const { email, password } = this.state;
+
+    if (!email || !password) {
+      Alert.alert('Gagal', 'Masukkan Email dan Password');
+      return;
+    }
+
+    this.setState({ loading: true });
+
+    await firebase.auth().signInWithEmailAndPassword(email, password)
+      .then(this.onLoginSuccess.bind(this))
+      .catch(async () => {
+        await firebase.auth().createUserWithEmailAndPassword(email, password)
+          .then(this.onLoginSuccess.bind(this))
+          .catch(this.onLoginFail.bind(this));
+      });
+  }
+
+  onLoginFail() {
+    this.setState({ loading: false });
+    Alert.alert('Gagal', 'Email atau Password salah');
+  }
+
+  onLoginSuccess() {
+    this.setState({ email: '', password: '', loading: false });
+    this.props.navigation.navigate('App');
   }
 
   _signInFacebook = async () => {
