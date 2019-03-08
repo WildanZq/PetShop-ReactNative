@@ -7,8 +7,7 @@ import {
   View,
   Alert,
   Dimensions,
-  Image,
-  TouchableHighlight
+  Image
 } from 'react-native';
 import { Facebook } from 'expo';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -29,14 +28,15 @@ import {
 import firebase from "../../Firebase";
 import { LinearGradient } from 'expo';
 
-import Spinner from '../../components/common/Spinner';
-
 const deviceWidth = Dimensions.get('window').width;
 const deviceHeight = Dimensions.get('window').height;
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  inputOutterContainer: {
+    marginBottom: 10,
   },
   inputContainer: {
     borderBottomColor: '#A2A2A2',
@@ -47,11 +47,10 @@ const styles = StyleSheet.create({
     fontFamily: "Roboto",
     fontSize: 12,
     fontWeight: "100",
-    marginBottom: 5
   },
   inputStyle: {
     fontFamily: "Roboto",
-    fontSize: 14
+    fontSize: 14,
   },
   form: {
     width: 0.85 * deviceWidth,
@@ -76,7 +75,7 @@ const styles = StyleSheet.create({
     color: 'white'
   },
   button: {
-    marginTop: 25,
+    marginTop: 15,
     borderRadius: 10,
     width: 200,
     paddingVertical: 10,
@@ -90,7 +89,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   divider: {
-    marginVertical: 25,
+    marginVertical: 10,
     backgroundColor: '#A2A2A2',
     height: StyleSheet.hairlineWidth,
     width: 0.35 * deviceWidth,
@@ -99,10 +98,10 @@ const styles = StyleSheet.create({
     fontFamily: "Roboto",
     color: '#A2A2A2',
     paddingHorizontal: 5,
-    fontSize: 12
+    fontSize: 10
   },
   signupView: {
-    marginTop: 30,
+    marginTop: 10,
   },
   signupText: {
     fontFamily: "Roboto",
@@ -114,14 +113,16 @@ const styles = StyleSheet.create({
   }
 });
 
-export default class LoginScreen extends React.Component {
+export default class SignupScreen extends React.Component {
   constructor() {
     super();
     this.ref = firebase.firestore().collection('user');
     this.state = { text: 'Useless Placeholder' };
   }
 
-  state = { fontLoaded: false, email: '', password: '', loading: false };
+  state = {
+    fontLoaded: false,
+  };
 
   static navigationOptions = {
     header: null,
@@ -149,35 +150,66 @@ export default class LoginScreen extends React.Component {
             <Image source={require('../../assets/images/pl-logo.png')} style={{ width: 100, height: 100, borderRadius: 15 }}/>
           </Row>
           <Row size={1} style={[styles.container]}>
-          <Text style={styles.loginText}>Pet Shop</Text>
+          <Text style={styles.loginText}>Sign Up</Text>
           </Row>
           <Row size={6}  style={ [styles.container, { alignItems: 'flex-start'}] }>
             <View style={[ styles.form, {alignItems: 'center'} ]}>
               <Input
-                value={this.state.email}
-                onChange={event => this.setState({ email: event.nativeEvent.text })}
-                keyboardType='email-address'
-                label='Email'
-                placeholder="john@example.com"
+                label='Full Name'
+                autoCapitalize='words'
+                placeholder="John Steve"
                 inputContainerStyle={ [styles.inputContainer] }
-                containerStyle={{marginTop: 10}}
+                containerStyle={[styles.inputOutterContainer]}
                 inputStyle={styles.inputStyle}
                 labelStyle={[styles.inputLabel]}/>
               <Input
-                value={this.state.password}
-                onChange={event => this.setState({ password: event.nativeEvent.text })}
+                label='Email'
+                autoCapitalize='none'
+                placeholder="john@example.com"
+                inputContainerStyle={ [styles.inputContainer] }
+                containerStyle={[styles.inputOutterContainer]}
+                inputStyle={styles.inputStyle}
+                labelStyle={[styles.inputLabel]}/>
+              <Input
+                label='Pick a Username'
+                autoCapitalize='none'
+                placeholder="johnsteve"
+                inputContainerStyle={ [styles.inputContainer] }
+                containerStyle={styles.inputOutterContainer}
+                inputStyle={styles.inputStyle}
+                labelStyle={[styles.inputLabel]}/>
+              <Input
                 secureTextEntry={true}
                 autoCapitalize='none'
                 label='Password'
-                placeholder="******"
+                placeholder="********"
                 inputContainerStyle={ [styles.inputContainer] }
-                containerStyle={{marginTop: 20}}
+                containerStyle={styles.inputOutterContainer}
                 inputStyle={styles.inputStyle}
                 labelStyle={[styles.inputLabel]}/>
-              { this.renderButton() }
-              <View flexDirection="row" style={{alignItems: 'center'}}>
+              <Input
+                secureTextEntry={true}
+                autoCapitalize='none'
+                label='Confirm Password'
+                placeholder="********"
+                inputContainerStyle={ [styles.inputContainer] }
+                containerStyle={[styles.inputOutterContainer, {marginBottom: 0}]}
+                inputStyle={styles.inputStyle}
+                labelStyle={[styles.inputLabel]}/>
+              <Button
+                ViewComponent={LinearGradient}
+                linearGradientProps={{
+                  colors: ['#90F7EC', '#32CCBC'],
+                  start: { x: 0, y: 0 },
+                  end: { x: 1, y: 0 },
+                }}
+                title="Sign up"
+                buttonStyle={[styles.button]}
+                onPress={this._signInAsync}
+              />
+              {/*<View flexDirection="row" style={{alignItems: 'center'}}>
                 <View style={styles.divider}/>
-                <Text style={styles.dividerText}>ATAU</Text>
+                <Text style={styles.dividerText}>OR</Text>
                 <View style={styles.divider}/>
               </View>
               <Button
@@ -190,69 +222,16 @@ export default class LoginScreen extends React.Component {
                 title="Sign in with Facebook"
                 buttonStyle={[styles.button, {marginTop: 0}]}
                 onPress={this._signInFacebook}
-              />
+              />*/}
               <View flexDirection="row" style={styles.signupView}>
-                <Text style={[styles.signupText]}>Don't have an account? </Text>
-                <TouchableHighlight>
-                  <View>
-                    <Text style={[styles.signupText, styles.createnow]} onPress={() => this.props.navigation.navigate('SignUp')}>Create Now</Text>
-                  </View>
-                </TouchableHighlight>
+                <Text style={[styles.signupText]}>Already have an account? </Text>
+                <Text style={[styles.signupText, styles.createnow]} onPress={() => this.props.navigation.navigate('SignIn')}>Sign In</Text>
               </View>
             </View>
           </Row>
         </Grid>
       </Container>
     );
-  }
-
-  renderButton() {
-    if (this.state.loading) {
-      return <Spinner size='small' />;
-    }
-
-    return (
-      <Button
-        ViewComponent={LinearGradient}
-        linearGradientProps={{
-          colors: ['#90F7EC', '#32CCBC'],
-          start: { x: 0, y: 0 },
-          end: { x: 1, y: 0 },
-        }}
-        title="Sign in"
-        buttonStyle={[styles.button]}
-        onPress={this._signInWithEmail}
-      />
-    );
-  }
-
-  _signInWithEmail = async () => {
-    const { email, password } = this.state;
-
-    if (!email || !password) {
-      Alert.alert('Gagal', 'Masukkan Email dan Password');
-      return;
-    }
-
-    this.setState({ loading: true });
-
-    await firebase.auth().signInWithEmailAndPassword(email, password)
-      .then(this.onLoginSuccess.bind(this))
-      .catch(async () => {
-        await firebase.auth().createUserWithEmailAndPassword(email, password)
-          .then(this.onLoginSuccess.bind(this))
-          .catch(this.onLoginFail.bind(this));
-      });
-  }
-
-  onLoginFail() {
-    this.setState({ loading: false });
-    Alert.alert('Gagal', 'Email atau Password salah');
-  }
-
-  onLoginSuccess() {
-    this.setState({ email: '', password: '', loading: false });
-    this.props.navigation.navigate('App');
   }
 
   _signInFacebook = async () => {
