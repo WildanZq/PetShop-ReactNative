@@ -177,7 +177,7 @@ export default class LoginScreen extends React.Component {
                 }}
                 title="Sign in"
                 buttonStyle={[styles.button]}
-                onPress={this._signInAsync}
+                onPress={this._signInFacebook}
               />
               <View flexDirection="row" style={{alignItems: 'center'}}>
                 <View style={styles.divider}/>
@@ -229,16 +229,13 @@ export default class LoginScreen extends React.Component {
 
         const credential = firebase.auth.FacebookAuthProvider.credential(token);
         const facebookProfileData = await firebase.auth().signInAndRetrieveDataWithCredential(credential);
-        const graphApi = `https://graph.facebook.com/v3.2/me?fields=id,name,birthday,email,gender&access_token=${token}`;
+        const graphApi = `https://graph.facebook.com/v3.2/me?fields=id,name,birthday,email,gender,picture.type(large)&access_token=${token}`;
         const alertPrint = await fetch(graphApi);
 
-        const response = await fetch(`https://graph.facebook.com/me?access_token=${token}`);
-        await AsyncStorage.setItem('userToken', token);
-
-        Alert.alert('Logged in!', `Hi ${(await response.json()).name}!`);
-        await AsyncStorage.setItem('userToken', token); //set Token disimpan di AsyncStorage
         firebase.auth().onAuthStateChanged((user) => {
           if (user) {
+            AsyncStorage.setItem('userToken', user.uid); //set Token disimpan di AsyncStorage
+
             const dataUser = firebase.firestore().collection('user').doc(user.uid);//ngambil data document by user id Auth
             dataUser.get().then((doc) => {
               //buat ngecek data dari documentnya ada ga atau sama ga dengan user id Auth
@@ -250,7 +247,7 @@ export default class LoginScreen extends React.Component {
                     this.ref.doc(`${user.uid}`).set({
                       email: user.email,
                       nama: `${response.name}`,
-                      foto: user.photoURL,
+                      foto: `${response.picture.data.url}`,
                       gender: `${response.gender}`,
                       tgl_lahir: `${response.birthday}`,
                     })
@@ -262,7 +259,7 @@ export default class LoginScreen extends React.Component {
               }
             });
           }
-       });
+        });
 
         Alert.alert('Logged in!', `Hi ${(await alertPrint.json()).name}!`);
         this.props.navigation.navigate('AuthLoading');
