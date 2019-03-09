@@ -1,64 +1,64 @@
-import React, { Component } from "react";
+import React from "react";
 import {
   Image,
-  Platform,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
   FlatList,
-  AsyncStorage,
   NetInfo,
   RefreshControl
 } from "react-native";
-import { Col, Row, Grid } from "react-native-easy-grid";
 import {
   View,
   Text,
-  Container,
-  Header,
   Content,
   Card,
   CardItem,
   Body,
   Icon,
   Left,
-  Right,
-  Title,
-  Button,
-  Item,
-  Input,
-  Thumbnail,
-  Badge
+  Thumbnail
 } from "native-base";
 import { Dimensions } from "react-native";
-import { MonoText } from "../components/StyledText";
 import Swiper from 'react-native-swiper';
+
+import Colors from '../constants/Colors';
 import firebase from "../Firebase";
+import SearchInput from '../components/SearchInput';
 
 const DeviceWidth = Dimensions.get("window").width;
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
-    //header: null
     headerStyle: {
-      backgroundColor: '#29B6F6',
+      backgroundColor: Colors.primary,
     },
     headerTitle:
-          <Grid>
-            <Row>
-            <Col style={{width:80, marginTop:18}}><Text style={{color: '#fff'}}> LOGO</Text></Col>
-            <Col>
-              <Item rounded style={{marginTop:9, width:195, height:36}}>
-                <Input placeholder='Search' placeholderTextColor='#fff'/>
-              </Item>
-            </Col>
-            <Col style={{marginTop:13, width: 50, color: '#fff'}}>
-                <Icon style={{color: '#fff'}} name='cart' />
-            </Col>
-            </Row>
-          </Grid>,
+      <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 10 }}>
+        <View style={{ flex: .125, alignItems: 'center' }}>
+          <Image
+            style={{ width: 35, height: 35 }}
+            source={require('../assets/images/icon-transparent.png')}
+          />
+        </View>
+        <View style={{ flex: .75 }} >
+          <TouchableOpacity activeOpacity={1} onPress={() => console.log('search clicked')} >
+            <SearchInput editable={false} />
+          </TouchableOpacity>
+        </View>
+        <View style={{ flex: .125, alignItems: 'center' }}>
+          <TouchableOpacity onPress={() => console.log('cart clicked')} >
+            <Icon
+              name='md-cart'
+              size={50}
+              style={{ color: '#fff' }}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
   };
+
   constructor() {
     super();
     this.ref = firebase.firestore().collection("boards");
