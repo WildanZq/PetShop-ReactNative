@@ -20,14 +20,10 @@ import {
   Left,
   Thumbnail
 } from "native-base";
-import { Dimensions } from "react-native";
-import Swiper from 'react-native-swiper';
 
 import Colors from '../constants/Colors';
 import firebase from "../Firebase";
 import SearchInput from '../components/SearchInput';
-
-const DeviceWidth = Dimensions.get("window").width;
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
@@ -137,86 +133,75 @@ export default class HomeScreen extends React.Component {
 
     return (
       <ScrollView
-      refreshControl={
+        refreshControl={
           <RefreshControl
-           refreshing={this.state.isFetching}
-           onRefresh={() => firebase.firestore().enableNetwork()}
+            refreshing={this.state.isFetching}
+            onRefresh={() => firebase.firestore().enableNetwork()}
           />
         }
-      showsVerticalScrollIndicator={false}>
-        <View style={{height:200}}>
-            <Swiper showsButtons={true} autoplay={true}>
-              <View style={styleSlider.slide1}>
-              <Image
-                  style={{width: 400, height: 300}}
-                  source={{uri: 'https://www.barnesandnoble.com/blog/sci-fi-fantasy/wp-content/uploads/sites/4/2017/07/onepiece2.jpg'}}
-              />
-              </View>
-              <View style={styleSlider.slide2}>
-                <Text style={styleSlider.text}>Beautiful</Text>
-              </View>
-              <View style={styleSlider.slide3}>
-                <Text style={styleSlider.text}>And simple</Text>
-              </View>
-            </Swiper>
-        </View>
-
+        showsVerticalScrollIndicator={false} >
           <Card
             style={{
               flexDirection: "row",
-              flex: 0,
+              flex: 1,
               justifyContent: "center",
               alignItems: "center",
-              height: "auto"
+              height: "auto",
+              marginTop: 0,
+              marginRight: 0,
+              marginLeft: 0,
+              flexWrap: 'wrap',
+              paddingVertical: 16,
+              paddingHorizontal: 14
             }}
           >
-            <View style={{marginTop:20}}>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="home" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="adjust" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
+            <View>
+              <TouchableOpacity style={styles.menuIcon}>
+                <Icon type="MaterialIcons" name="pets" size={18} style={{ color: '#ffc956' }} />
+              </TouchableOpacity>
+              <Text style={styles.menuLabel}>Adopsi</Text>
             </View>
-            <View style={{marginTop:20}}>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="anchor" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="archive" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
+            <View>
+              <TouchableOpacity style={styles.menuIcon}>
+                <Icon type="MaterialCommunityIcons" name="food" size={18} style={{ color: "#3ebc42" }} />
+              </TouchableOpacity>
+              <Text style={styles.menuLabel}>Makanan</Text>
             </View>
-            <View style={{marginTop:20}}>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="database" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="home" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
+            <View>
+              <TouchableOpacity style={styles.menuIcon}>
+                <Icon type="MaterialCommunityIcons" name="tshirt-crew" size={18} style={{ color: '#d2e524' }} />
+              </TouchableOpacity>
+              <Text style={styles.menuLabel}>Aksesoris</Text>
             </View>
-            <View style={{marginTop:20}}>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="home" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="gavel" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
+            <View>
+              <TouchableOpacity style={styles.menuIcon}>
+                <Icon type="Ionicons" name="ios-baseball" size={18} style={{ color: '#942bb5' }} />
+              </TouchableOpacity>
+              <Text style={styles.menuLabel}>Mainan</Text>
+            </View>
+            <View>
+              <TouchableOpacity style={styles.menuIcon}>
+                <Icon type="FontAwesome" name="stethoscope" size={18} style={{ color: '#359fa3' }} />
+              </TouchableOpacity>
+              <Text style={styles.menuLabel}>Kesehatan</Text>
+            </View>
+            <View>
+              <TouchableOpacity style={styles.menuIcon}>
+                <Icon type="MaterialCommunityIcons" name="pill" size={18} style={{ color: '#c62121' }} />
+              </TouchableOpacity>
+              <Text style={styles.menuLabel}>Suplemen</Text>
+            </View>
+            <View>
+              <TouchableOpacity style={styles.menuIcon}>
+                <Icon type="MaterialCommunityIcons" name="lightbulb-on-outline" size={18} style={{ color: '#147cd1' }} />
+              </TouchableOpacity>
+              <Text style={styles.menuLabel}>Tips</Text>
+            </View>
+            <View>
+              <TouchableOpacity style={styles.menuIcon}>
+                <Icon type="MaterialCommunityIcons" name="dog-side" size={18} style={{ color: '#a58c0b' }} />
+              </TouchableOpacity>
+              <Text style={styles.menuLabel}>Terlantar</Text>
             </View>
           </Card>
 
@@ -285,50 +270,22 @@ const styles = StyleSheet.create({
   },
   menuIcon: {
     borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.2)",
+    borderColor: Colors.divider,
     alignItems: "center",
     justifyContent: "center",
-    width: 40,
-    height: 40,
-    borderRadius: 100
-  },
-  viewIcon: {
-    width: DeviceWidth * 0.2,
-    height: DeviceWidth * 0.2,
-    marginBottom: 10,
-    marginLeft: 10
-  }
-});
-
-const styleSlider = StyleSheet.create({
-  wrapper: {
-    height: 0,
-  },
-  slide1: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#9DD6EB',
-  },
-  slide2: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#97CAE5',
-  },
-  slide3: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#92BBD9',
-  },
-  text: {
-    color: '#fff',
-    fontSize: 30,
-    fontWeight: 'bold',
-  },
-  thumb: {
+    borderRadius: 12,
     width: 50,
-    height: 50
+    height: 50,
+    marginTop: 10,
+    marginLeft: 15,
+    marginRight: 15,
+    marginBottom: 0
+  },
+  menuLabel: {
+    marginTop: 2,
+    marginBottom: 10,
+    fontSize: 12,
+    textAlign: 'center',
+    color: Colors.secondaryText
   }
 });

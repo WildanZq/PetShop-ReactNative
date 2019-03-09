@@ -6,7 +6,7 @@ export default {
   accent: '#ffeb3b',
   primaryText: '#212112',
   secondaryText: '#757575',
-  divider: '#bdbdbd',
+  divider: '#dfdfdf',
   tabIconDefault: '#ccc',
   tabIconSelected: tintColor,
   tabBar: '#fefefe',
