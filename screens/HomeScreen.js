@@ -4,16 +4,17 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
-  View,
   ActivityIndicator,
   FlatList,
-  AsyncStorage
+  AsyncStorage,
+  NetInfo,
+  RefreshControl
 } from "react-native";
-
 import { Col, Row, Grid } from "react-native-easy-grid";
 import {
+  View,
+  Text,
   Container,
   Header,
   Content,
@@ -27,32 +28,33 @@ import {
   Button,
   Item,
   Input,
-  Thumbnail
+  Thumbnail,
+  Badge
 } from "native-base";
-
 import { Dimensions } from "react-native";
-const DeviceWidth = Dimensions.get("window").width;
-
 import { MonoText } from "../components/StyledText";
-
 import Swiper from 'react-native-swiper';
-
 import firebase from "../Firebase";
+
+const DeviceWidth = Dimensions.get("window").width;
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
     //header: null
+    headerStyle: {
+      backgroundColor: '#29B6F6',
+    },
     headerTitle:
           <Grid>
             <Row>
-            <Col style={{width:80, marginTop:18}}><Text> LOGO</Text></Col>
+            <Col style={{width:80, marginTop:18}}><Text style={{color: '#fff'}}> LOGO</Text></Col>
             <Col>
               <Item rounded style={{marginTop:9, width:195, height:36}}>
-                <Input placeholder='Search'/>
+                <Input placeholder='Search' placeholderTextColor='#fff'/>
               </Item>
             </Col>
-            <Col style={{marginTop:13, width: 50}}>
-              <Icon name='cart' />
+            <Col style={{marginTop:13, width: 50, color: '#fff'}}>
+                <Icon style={{color: '#fff'}} name='cart' />
             </Col>
             </Row>
           </Grid>,
@@ -60,11 +62,14 @@ export default class HomeScreen extends React.Component {
   constructor() {
     super();
     this.ref = firebase.firestore().collection("boards");
+    NetInfo.isConnected.fetch().done((isConnected) => {
+        if ( isConnected ) { firebase.firestore().enableNetwork(); }
+        else { firebase.firestore().disableNetwork(); }
+    });
     this.unsubscribe = null;
     this.state = {
       isLoading: true,
-      userAuth: null,
-      userFb: '',
+      isFetching: false,
       boards: []
     };
   }
@@ -89,24 +94,6 @@ export default class HomeScreen extends React.Component {
 
   componentDidMount() {
     this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
-    firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        AsyncStorage.getItem('userToken', (error, result) => {
-            if (result) {
-                fetch(`https://graph.facebook.com/v3.2/me?fields=id,birthday,email,gender,address&access_token=${result}`)
-                .then(response => response.json())
-                .then((response) => {
-                  this.setState({
-                    userFb: response
-                  });
-                })
-                .catch(error => console.log(error));
-            }
-        });
-
-        this.setState({ userAuth: user });
-      }
-   });
   }
 
   componentWillUnmount() {
@@ -139,12 +126,6 @@ export default class HomeScreen extends React.Component {
     </Content>
   );
 
-  _signOutAsync = async () => {
-    await AsyncStorage.clear();
-    firebase.auth().signOut();
-    this.props.navigation.navigate('AuthLoading');
-  };
-
   render() {
     if (this.state.isLoading) {
       return (
@@ -155,9 +136,16 @@ export default class HomeScreen extends React.Component {
     }
 
     return (
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+      refreshControl={
+          <RefreshControl
+           refreshing={this.state.isFetching}
+           onRefresh={() => firebase.firestore().enableNetwork()}
+          />
+        }
+      showsVerticalScrollIndicator={false}>
         <View style={{height:200}}>
-            <Swiper showsButtons={true}>
+            <Swiper showsButtons={true} autoplay={true}>
               <View style={styleSlider.slide1}>
               <Image
                   style={{width: 400, height: 300}}
@@ -233,10 +221,7 @@ export default class HomeScreen extends React.Component {
           </Card>
 
           <View>
-            <Button primary onPress={this._signOutAsync}><Text> Actually, sign me out :) </Text></Button>
-            <Text>{"\n"}Recommended for you{"\n"}</Text>
-            <Text>{this.state.userFb.birthday}</Text>
-            <Image style={{ width: 50, height: 50 }} source={{ uri: this.state.userAuth.photoURL }} />
+            <Text>{"\n\n"} Recommended for you{"\n"}</Text>
           </View>
 
           <FlatList
