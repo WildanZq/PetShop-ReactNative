@@ -7,8 +7,7 @@ import {
   View,
   Alert,
   Dimensions,
-  Image,
-  TouchableHighlight
+  Image
 } from 'react-native';
 import { Facebook } from 'expo';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -35,6 +34,9 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  inputOutterContainer: {
+    marginBottom: 10,
   },
   inputContainer: {
     borderBottomColor: '#A2A2A2',
@@ -73,7 +75,7 @@ const styles = StyleSheet.create({
     color: 'white'
   },
   button: {
-    marginTop: 25,
+    marginTop: 15,
     borderRadius: 10,
     width: 200,
     paddingVertical: 10,
@@ -87,7 +89,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   divider: {
-    marginVertical: 25,
+    marginVertical: 10,
     backgroundColor: '#A2A2A2',
     height: StyleSheet.hairlineWidth,
     width: 0.35 * deviceWidth,
@@ -96,10 +98,10 @@ const styles = StyleSheet.create({
     fontFamily: "Roboto",
     color: '#A2A2A2',
     paddingHorizontal: 5,
-    fontSize: 12
+    fontSize: 10
   },
   signupView: {
-    marginTop: 30,
+    marginTop: 10,
   },
   signupText: {
     fontFamily: "Roboto",
@@ -111,7 +113,7 @@ const styles = StyleSheet.create({
   }
 });
 
-export default class LoginScreen extends React.Component {
+export default class SignupScreen extends React.Component {
   constructor() {
     super();
     this.ref = firebase.firestore().collection('user');
@@ -148,24 +150,50 @@ export default class LoginScreen extends React.Component {
             <Image source={require('../../assets/images/pl-logo.png')} style={{ width: 100, height: 100, borderRadius: 15 }}/>
           </Row>
           <Row size={1} style={[styles.container]}>
-          <Text style={styles.loginText}>Sign In</Text>
+          <Text style={styles.loginText}>Sign Up</Text>
           </Row>
           <Row size={6}  style={ [styles.container, { alignItems: 'flex-start'}] }>
             <View style={[ styles.form, {alignItems: 'center'} ]}>
               <Input
-                label='Username or Email'
+                label='Full Name'
+                autoCapitalize='words'
+                placeholder="John Steve"
+                inputContainerStyle={ [styles.inputContainer] }
+                containerStyle={[styles.inputOutterContainer]}
+                inputStyle={styles.inputStyle}
+                labelStyle={[styles.inputLabel]}/>
+              <Input
+                label='Email'
+                autoCapitalize='none'
                 placeholder="john@example.com"
                 inputContainerStyle={ [styles.inputContainer] }
-                containerStyle={{marginTop: 10}}
+                containerStyle={[styles.inputOutterContainer]}
+                inputStyle={styles.inputStyle}
+                labelStyle={[styles.inputLabel]}/>
+              <Input
+                label='Pick a Username'
+                autoCapitalize='none'
+                placeholder="johnsteve"
+                inputContainerStyle={ [styles.inputContainer] }
+                containerStyle={styles.inputOutterContainer}
                 inputStyle={styles.inputStyle}
                 labelStyle={[styles.inputLabel]}/>
               <Input
                 secureTextEntry={true}
                 autoCapitalize='none'
                 label='Password'
-                placeholder="Password"
+                placeholder="********"
                 inputContainerStyle={ [styles.inputContainer] }
-                containerStyle={{marginTop: 20}}
+                containerStyle={styles.inputOutterContainer}
+                inputStyle={styles.inputStyle}
+                labelStyle={[styles.inputLabel]}/>
+              <Input
+                secureTextEntry={true}
+                autoCapitalize='none'
+                label='Confirm Password'
+                placeholder="********"
+                inputContainerStyle={ [styles.inputContainer] }
+                containerStyle={[styles.inputOutterContainer, {marginBottom: 0}]}
                 inputStyle={styles.inputStyle}
                 labelStyle={[styles.inputLabel]}/>
               <Button
@@ -175,11 +203,11 @@ export default class LoginScreen extends React.Component {
                   start: { x: 0, y: 0 },
                   end: { x: 1, y: 0 },
                 }}
-                title="Sign in"
+                title="Sign up"
                 buttonStyle={[styles.button]}
-                onPress={this._signInFacebook}
+                onPress={this._signInAsync}
               />
-              <View flexDirection="row" style={{alignItems: 'center'}}>
+              {/*<View flexDirection="row" style={{alignItems: 'center'}}>
                 <View style={styles.divider}/>
                 <Text style={styles.dividerText}>OR</Text>
                 <View style={styles.divider}/>
@@ -194,14 +222,10 @@ export default class LoginScreen extends React.Component {
                 title="Sign in with Facebook"
                 buttonStyle={[styles.button, {marginTop: 0}]}
                 onPress={this._signInFacebook}
-              />
+              />*/}
               <View flexDirection="row" style={styles.signupView}>
-                <Text style={[styles.signupText]}>Don't have an account? </Text>
-                <TouchableHighlight>
-                  <View>
-                    <Text style={[styles.signupText, styles.createnow]} onPress={() => this.props.navigation.navigate('SignUp')}>Create Now</Text>
-                  </View>
-                </TouchableHighlight>
+                <Text style={[styles.signupText]}>Already have an account? </Text>
+                <Text style={[styles.signupText, styles.createnow]} onPress={() => this.props.navigation.navigate('SignIn')}>Sign In</Text>
               </View>
             </View>
           </Row>
@@ -220,7 +244,7 @@ export default class LoginScreen extends React.Component {
       permissions,
       declinedPermissions,
     } = await Facebook.logInWithReadPermissionsAsync(appId, {
-      permissions: ['public_profile'],
+      permissions: ['public_profile', 'user_gender', 'user_birthday'],
     });
 
     switch (type) {
@@ -229,13 +253,16 @@ export default class LoginScreen extends React.Component {
 
         const credential = firebase.auth.FacebookAuthProvider.credential(token);
         const facebookProfileData = await firebase.auth().signInAndRetrieveDataWithCredential(credential);
-        const graphApi = `https://graph.facebook.com/v3.2/me?fields=id,name,email,picture.type(large)&access_token=${token}`;
+        const graphApi = `https://graph.facebook.com/v3.2/me?fields=id,name,birthday,email,gender&access_token=${token}`;
         const alertPrint = await fetch(graphApi);
 
+        const response = await fetch(`https://graph.facebook.com/me?access_token=${token}`);
+        await AsyncStorage.setItem('userToken', token);
+
+        Alert.alert('Logged in!', `Hi ${(await response.json()).name}!`);
+        await AsyncStorage.setItem('userToken', token); //set Token disimpan di AsyncStorage
         firebase.auth().onAuthStateChanged((user) => {
           if (user) {
-            AsyncStorage.setItem('userToken', user.uid); //set Token disimpan di AsyncStorage
-
             const dataUser = firebase.firestore().collection('user').doc(user.uid);//ngambil data document by user id Auth
             dataUser.get().then((doc) => {
               //buat ngecek data dari documentnya ada ga atau sama ga dengan user id Auth
@@ -247,7 +274,9 @@ export default class LoginScreen extends React.Component {
                     this.ref.doc(`${user.uid}`).set({
                       email: user.email,
                       nama: `${response.name}`,
-                      foto: `${response.picture.data.url}`,
+                      foto: user.photoURL,
+                      gender: `${response.gender}`,
+                      tgl_lahir: `${response.birthday}`,
                     })
                     .catch((error) => {
                       console.error("Error adding user: ", error);
@@ -257,7 +286,7 @@ export default class LoginScreen extends React.Component {
               }
             });
           }
-        });
+       });
 
         Alert.alert('Logged in!', `Hi ${(await alertPrint.json()).name}!`);
         this.props.navigation.navigate('AuthLoading');

@@ -4,9 +4,15 @@ import { createAppContainer, createSwitchNavigator, createStackNavigator } from 
 import MainTabNavigator from './MainTabNavigator';
 import AuthLoadingScreen from '../screens/login/AuthNavigator';
 import LoginScreen from '../screens/login/LoginScreen';
+import SignupScreen from '../screens/login/SignupScreen';
 import DetailBarangScreen from '../screens/barang/DetailBarangScreen';
 
-const AuthStack = createStackNavigator({ SignIn: LoginScreen });
+const AuthStack = createStackNavigator(
+  {
+    SignIn: LoginScreen,
+    SignUp: SignupScreen,
+  }
+);
 const doNotShowHeaderOption = {
   navigationOptions: {
     header: null,
