@@ -215,7 +215,7 @@ export default class LoginScreen extends React.Component {
       permissions,
       declinedPermissions,
     } = await Facebook.logInWithReadPermissionsAsync(appId, {
-      permissions: ['public_profile', 'user_gender', 'user_birthday'],
+      permissions: ['public_profile'],
     });
 
     switch (type) {
@@ -224,7 +224,7 @@ export default class LoginScreen extends React.Component {
 
         const credential = firebase.auth.FacebookAuthProvider.credential(token);
         const facebookProfileData = await firebase.auth().signInAndRetrieveDataWithCredential(credential);
-        const graphApi = `https://graph.facebook.com/v3.2/me?fields=id,name,birthday,email,gender,picture.type(large)&access_token=${token}`;
+        const graphApi = `https://graph.facebook.com/v3.2/me?fields=id,name,email,picture.type(large)&access_token=${token}`;
         const alertPrint = await fetch(graphApi);
 
         firebase.auth().onAuthStateChanged((user) => {
@@ -243,8 +243,6 @@ export default class LoginScreen extends React.Component {
                       email: user.email,
                       nama: `${response.name}`,
                       foto: `${response.picture.data.url}`,
-                      gender: `${response.gender}`,
-                      tgl_lahir: `${response.birthday}`,
                     })
                     .catch((error) => {
                       console.error("Error adding user: ", error);

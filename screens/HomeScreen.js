@@ -9,31 +9,22 @@ import {
   FlatList,
   AsyncStorage,
   NetInfo,
-  RefreshControl
+  RefreshControl,
+  Dimensions,
 } from "react-native";
 import { Col, Row, Grid } from "react-native-easy-grid";
 import {
   View,
   Text,
-  Container,
-  Header,
-  Content,
   Card,
   CardItem,
-  Body,
   Icon,
-  Left,
-  Right,
-  Title,
   Button,
   Item,
   Input,
-  Thumbnail,
-  Badge
 } from "native-base";
-import { Dimensions } from "react-native";
-import { MonoText } from "../components/StyledText";
 import Swiper from 'react-native-swiper';
+import DataListNya from '../components/itemCardNya';
 import firebase from "../Firebase";
 
 const DeviceWidth = Dimensions.get("window").width;
@@ -100,32 +91,6 @@ export default class HomeScreen extends React.Component {
     this.isCancelled = true;
   }
 
-  _renderItem = ({item}) => (
-    <Content>
-    <Card style={{ flex: 0, margin: 5, backgroundColor: '#ddd', height: "auto"}}>
-      <CardItem>
-        <Left>
-          <Thumbnail source={{uri: 'https://www.barnesandnoble.com/blog/sci-fi-fantasy/wp-content/uploads/sites/4/2017/07/onepiece2.jpg'}} />
-          <Body>
-            <Text>{item.title}</Text>
-            <Text note>bl4ckck</Text>
-          </Body>
-        </Left>
-      </CardItem>
-      <CardItem cardBody>
-        <Image source={{uri: 'https://www.barnesandnoble.com/blog/sci-fi-fantasy/wp-content/uploads/sites/4/2017/07/onepiece2.jpg'}} style={{height: 200, width: null, flex: 1}}/>
-      </CardItem>
-      <CardItem>
-        <Left>
-        <Body>
-          <Text note>{item.key}</Text>
-        </Body>
-        </Left>
-      </CardItem>
-    </Card>
-    </Content>
-  );
-
   render() {
     if (this.state.isLoading) {
       return (
@@ -137,13 +102,13 @@ export default class HomeScreen extends React.Component {
 
     return (
       <ScrollView
-      refreshControl={
+        refreshControl={
           <RefreshControl
            refreshing={this.state.isFetching}
            onRefresh={() => firebase.firestore().enableNetwork()}
           />
         }
-      showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}>
         <View style={{height:200}}>
             <Swiper showsButtons={true} autoplay={true}>
               <View style={styleSlider.slide1}>
@@ -167,7 +132,8 @@ export default class HomeScreen extends React.Component {
               flex: 0,
               justifyContent: "center",
               alignItems: "center",
-              height: "auto"
+              height: "auto",
+              elevation: 1.5,
             }}
           >
             <View style={{marginTop:20}}>
@@ -226,7 +192,11 @@ export default class HomeScreen extends React.Component {
 
           <FlatList
             data={this.state.boards}
-            renderItem={this._renderItem} //method to render the data in the way you want using styling u need
+            renderItem={({ item }) => (
+              <DataListNya
+              navigation={this.props.navigation}
+              dataNya = { item } />
+            )}
             horizontal={false}
             numColumns={2}
           />

@@ -5,10 +5,9 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  View,
   AsyncStorage
 } from 'react-native'
-import { Button, Text } from 'native-base'
+import { View, Button, Text } from 'native-base'
 import { Icon } from 'react-native-elements'
 import firebase from "../Firebase";
 
@@ -93,11 +92,11 @@ const styles = StyleSheet.create({
 
 export default class ProfileScreen extends Component {
   static navigationOptions = {
+    headerTitle: 'Account',
     headerStyle: {
       backgroundColor: '#29B6F6',
     },
     headerTintColor: '#fff',
-    headerTitle: 'Account'
   }
   constructor() {
     super();
