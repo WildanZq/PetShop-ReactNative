@@ -162,7 +162,8 @@ export default class LoginScreen extends React.Component {
                 inputContainerStyle={ [styles.inputContainer] }
                 containerStyle={{marginTop: 10}}
                 inputStyle={styles.inputStyle}
-                labelStyle={[styles.inputLabel]}/>
+                labelStyle={[styles.inputLabel]}
+                onSubmitEditing={this._signInWithEmail} />
               <Input
                 value={this.state.password}
                 onChange={event => this.setState({ password: event.nativeEvent.text })}
@@ -173,7 +174,8 @@ export default class LoginScreen extends React.Component {
                 inputContainerStyle={ [styles.inputContainer] }
                 containerStyle={{marginTop: 20}}
                 inputStyle={styles.inputStyle}
-                labelStyle={[styles.inputLabel]}/>
+                labelStyle={[styles.inputLabel]}
+                onSubmitEditing={this._signInWithEmail} />
               { this.renderButton() }
               <View flexDirection="row" style={{alignItems: 'center'}}>
                 <View style={styles.divider}/>
@@ -237,12 +239,14 @@ export default class LoginScreen extends React.Component {
     this.setState({ loading: true });
 
     await firebase.auth().signInWithEmailAndPassword(email, password)
+      .then((userData) => {
+          AsyncStorage.setItem('userToken', userData.user.uid);
+      })
       .then(this.onLoginSuccess.bind(this))
-      .catch(async () => {
-        await firebase.auth().createUserWithEmailAndPassword(email, password)
-          .then(this.onLoginSuccess.bind(this))
-          .catch(this.onLoginFail.bind(this));
-      });
+      .catch((error) => {
+        this.onLoginFail();
+      }
+    );
   }
 
   onLoginFail() {
@@ -252,7 +256,7 @@ export default class LoginScreen extends React.Component {
 
   onLoginSuccess() {
     this.setState({ email: '', password: '', loading: false });
-    this.props.navigation.navigate('App');
+    this.props.navigation.navigate('Main');
   }
 
   _signInFacebook = async () => {
@@ -305,7 +309,7 @@ export default class LoginScreen extends React.Component {
         });
 
         Alert.alert('Logged in!', `Hi ${(await alertPrint.json()).name}!`);
-        this.props.navigation.navigate('AuthLoading');
+        this.props.navigation.navigate('Main');
       }
       case 'cancel': { }
     }

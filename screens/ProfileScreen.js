@@ -5,7 +5,8 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  AsyncStorage
+  AsyncStorage,
+  ActivityIndicator
 } from 'react-native'
 import { View, Button, Text } from 'native-base'
 import { Icon } from 'react-native-elements'
@@ -103,14 +104,21 @@ export default class ProfileScreen extends Component {
     this.state = {
       isLoading: true,
       getUser: {},
-      key: ''
+      key: '',
     };
   }
+
+  _signIn = async () =>  {
+    this.props.navigation.navigate('SignIn');
+  };
 
   _signOutAsync = async () => {
     await AsyncStorage.clear();
     firebase.auth().signOut();
-    this.props.navigation.navigate('AuthLoading');
+    this.setState({
+      key: '',
+      isLoading: false
+    });
   };
 
   componentDidMount() {
@@ -122,14 +130,25 @@ export default class ProfileScreen extends Component {
               this.setState({
                 getUser: doc.data(),
                 key: doc.id,
-                isLoading: false
+                isLoading: false,
               });
             } else {
               console.log("No such document!");
             }
           });
         }
+        else {
+          this.setState({
+            isLoading: false,
+          });
+        }
     });
+  }
+
+  renderDefault = () => {
+      return (
+        <Button rounded green onPress={this._signIn}><Text> Sign In </Text></Button>
+      )
   }
 
   renderContactHeader = () => {
@@ -179,10 +198,23 @@ export default class ProfileScreen extends Component {
   }
 
   render() {
+    const isLoggedIn = this.state.key;
+
+    if (this.state.isLoading) {
+      return (
+        <View style={styles.activity}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      );
+    }
     return (
         <View style={[styles.container]}>
           <View style={styles.cardContainer}>
-            {this.renderContactHeader()}
+          {isLoggedIn ? (
+            this.renderContactHeader()
+            ): (
+              this.renderDefault()
+          )}
           </View>
         </View>
     )
