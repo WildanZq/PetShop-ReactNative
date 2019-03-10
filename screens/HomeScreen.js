@@ -7,8 +7,7 @@ import {
   ActivityIndicator,
   FlatList,
   NetInfo,
-  RefreshControl,
-  Dimensions,
+  RefreshControl
 } from "react-native";
 import {
   View,
@@ -21,10 +20,10 @@ import {
   Thumbnail
 } from "native-base";
 import Swiper from 'react-native-swiper';
-import DataListNya from '../components/itemCardNya';
 import Colors from '../constants/Colors';
 import SearchInput from '../components/SearchInput';
 import firebase from "../Firebase";
+import ProductItem from "../components/ProductItem";
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
@@ -98,14 +97,6 @@ export default class HomeScreen extends React.Component {
   }
 
   render() {
-    if (this.state.isLoading) {
-      return (
-        <View style={styles.activity}>
-          <ActivityIndicator size="large" color="#0000ff" />
-        </View>
-      );
-    }
-
     return (
       <ScrollView
         refreshControl={
@@ -115,12 +106,12 @@ export default class HomeScreen extends React.Component {
           />
         }
         showsVerticalScrollIndicator={false}>
-        <View style={{height:200}}>
+          <View style={{height:160}}>
             <Swiper showsButtons={true} autoplay={true}>
               <View style={styleSlider.slide1}>
               <Image
-                  style={{width: 400, height: 300}}
-                  source={{uri: 'https://www.barnesandnoble.com/blog/sci-fi-fantasy/wp-content/uploads/sites/4/2017/07/onepiece2.jpg'}}
+                style={{width: 400, height: 300}}
+                source={{uri: 'https://www.barnesandnoble.com/blog/sci-fi-fantasy/wp-content/uploads/sites/4/2017/07/onepiece2.jpg'}}
               />
               </View>
               <View style={styleSlider.slide2}>
@@ -130,7 +121,7 @@ export default class HomeScreen extends React.Component {
                 <Text style={styleSlider.text}>And simple</Text>
               </View>
             </Swiper>
-        </View>
+          </View>
 
           <Card
             style={{
@@ -198,22 +189,35 @@ export default class HomeScreen extends React.Component {
             </View>
           </Card>
 
-          <View>
-            <Text>{"\n\n"} Recommended for you{"\n"}</Text>
+          <View style={{ paddingLeft: 10 }}>
+            <Text style={{ color: Colors.primaryText, fontSize: 18, marginTop: 20 }}>Rekomendasi untuk Anda</Text>
           </View>
 
-          <FlatList
-            data={this.state.boards}
-            renderItem={({ item }) => (
-              <DataListNya
-              navigation={this.props.navigation}
-              dataNya = { item } />
-            )}
-            horizontal={false}
-            numColumns={2}
-          />
+          {this.renderProductList()}
       </ScrollView>
     );
+  }
+
+  renderProductList() {
+    if (this.state.isLoading) {
+      return (
+        <View style={{ marginTop: 12 }}>
+          <ActivityIndicator size='small' color={Colors.primary} />
+        </View>
+      );
+    }
+
+    return (<FlatList
+      style={{ padding: 5 }}
+      data={this.state.boards}
+      renderItem={({ item }) => (
+        <ProductItem
+          navigation={this.props.navigation}
+          data={item} />
+      )}
+      horizontal={false}
+      numColumns={2}
+    />);
   }
 
   _maybeRenderDevelopmentModeWarning() {
@@ -253,18 +257,6 @@ export default class HomeScreen extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  activity: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    alignItems: "center",
-    justifyContent: "center"
-  },
-  iconColor1: {
-    backgroundColor: "red"
-  },
   menuIcon: {
     borderWidth: 1,
     borderColor: Colors.divider,
