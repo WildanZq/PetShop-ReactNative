@@ -1,55 +1,61 @@
-import React, { Component } from "react";
+import React from "react";
 import {
   Image,
-  Platform,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
   FlatList,
-  AsyncStorage,
   NetInfo,
   RefreshControl,
   Dimensions,
 } from "react-native";
-import { Col, Row, Grid } from "react-native-easy-grid";
 import {
   View,
   Text,
+  Content,
   Card,
   CardItem,
   Icon,
-  Button,
-  Item,
-  Input,
+  Left,
+  Thumbnail
 } from "native-base";
 import Swiper from 'react-native-swiper';
 import DataListNya from '../components/itemCardNya';
+import Colors from '../constants/Colors';
+import SearchInput from '../components/SearchInput';
 import firebase from "../Firebase";
-
-const DeviceWidth = Dimensions.get("window").width;
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
-    //header: null
     headerStyle: {
-      backgroundColor: '#29B6F6',
+      backgroundColor: Colors.primary,
     },
     headerTitle:
-          <Grid>
-            <Row>
-            <Col style={{width:80, marginTop:18}}><Text style={{color: '#fff'}}> LOGO</Text></Col>
-            <Col>
-              <Item rounded style={{marginTop:9, width:195, height:36}}>
-                <Input placeholder='Search' placeholderTextColor='#fff'/>
-              </Item>
-            </Col>
-            <Col style={{marginTop:13, width: 50, color: '#fff'}}>
-                <Icon style={{color: '#fff'}} name='cart' />
-            </Col>
-            </Row>
-          </Grid>,
+      <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 10 }}>
+        <View style={{ flex: .125, alignItems: 'center' }}>
+          <Image
+            style={{ width: 35, height: 35 }}
+            source={require('../assets/images/icon-transparent.png')}
+          />
+        </View>
+        <View style={{ flex: .75 }} >
+          <TouchableOpacity activeOpacity={1} onPress={() => console.log('search clicked')} >
+            <SearchInput editable={true} />
+          </TouchableOpacity>
+        </View>
+        <View style={{ flex: .125, alignItems: 'center' }}>
+          <TouchableOpacity onPress={() => console.log('cart clicked')} >
+            <Icon
+              name='md-cart'
+              size={50}
+              style={{ color: '#fff' }}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
   };
+
   constructor() {
     super();
     this.ref = firebase.firestore().collection("boards");
@@ -104,8 +110,8 @@ export default class HomeScreen extends React.Component {
       <ScrollView
         refreshControl={
           <RefreshControl
-           refreshing={this.state.isFetching}
-           onRefresh={() => firebase.firestore().enableNetwork()}
+            refreshing={this.state.isFetching}
+            onRefresh={() => firebase.firestore().enableNetwork()}
           />
         }
         showsVerticalScrollIndicator={false}>
@@ -129,60 +135,66 @@ export default class HomeScreen extends React.Component {
           <Card
             style={{
               flexDirection: "row",
-              flex: 0,
+              flex: 1,
               justifyContent: "center",
               alignItems: "center",
               height: "auto",
               elevation: 1.5,
+              marginTop: 0,
+              marginRight: 0,
+              marginLeft: 0,
+              flexWrap: 'wrap',
+              paddingVertical: 16,
+              paddingHorizontal: 14
             }}
           >
-            <View style={{marginTop:20}}>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="home" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="adjust" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
+            <View>
+              <TouchableOpacity style={styles.menuIcon}>
+                <Icon type="MaterialIcons" name="pets" size={18} style={{ color: '#ffc956' }} />
+              </TouchableOpacity>
+              <Text style={styles.menuLabel}>Adopsi</Text>
             </View>
-            <View style={{marginTop:20}}>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="anchor" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="archive" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
+            <View>
+              <TouchableOpacity style={styles.menuIcon}>
+                <Icon type="MaterialCommunityIcons" name="food" size={18} style={{ color: "#3ebc42" }} />
+              </TouchableOpacity>
+              <Text style={styles.menuLabel}>Makanan</Text>
             </View>
-            <View style={{marginTop:20}}>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="database" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="home" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
+            <View>
+              <TouchableOpacity style={styles.menuIcon}>
+                <Icon type="MaterialCommunityIcons" name="tshirt-crew" size={18} style={{ color: '#d2e524' }} />
+              </TouchableOpacity>
+              <Text style={styles.menuLabel}>Aksesoris</Text>
             </View>
-            <View style={{marginTop:20}}>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="home" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="gavel" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
+            <View>
+              <TouchableOpacity style={styles.menuIcon}>
+                <Icon type="Ionicons" name="ios-baseball" size={18} style={{ color: '#942bb5' }} />
+              </TouchableOpacity>
+              <Text style={styles.menuLabel}>Mainan</Text>
+            </View>
+            <View>
+              <TouchableOpacity style={styles.menuIcon}>
+                <Icon type="FontAwesome" name="stethoscope" size={18} style={{ color: '#359fa3' }} />
+              </TouchableOpacity>
+              <Text style={styles.menuLabel}>Kesehatan</Text>
+            </View>
+            <View>
+              <TouchableOpacity style={styles.menuIcon}>
+                <Icon type="MaterialCommunityIcons" name="pill" size={18} style={{ color: '#c62121' }} />
+              </TouchableOpacity>
+              <Text style={styles.menuLabel}>Suplemen</Text>
+            </View>
+            <View>
+              <TouchableOpacity style={styles.menuIcon}>
+                <Icon type="MaterialCommunityIcons" name="lightbulb-on-outline" size={18} style={{ color: '#147cd1' }} />
+              </TouchableOpacity>
+              <Text style={styles.menuLabel}>Tips</Text>
+            </View>
+            <View>
+              <TouchableOpacity style={styles.menuIcon}>
+                <Icon type="MaterialCommunityIcons" name="dog-side" size={18} style={{ color: '#a58c0b' }} />
+              </TouchableOpacity>
+              <Text style={styles.menuLabel}>Terlantar</Text>
             </View>
           </Card>
 
@@ -255,18 +267,23 @@ const styles = StyleSheet.create({
   },
   menuIcon: {
     borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.2)",
+    borderColor: Colors.divider,
     alignItems: "center",
     justifyContent: "center",
-    width: 40,
-    height: 40,
-    borderRadius: 100
+    borderRadius: 12,
+    width: 50,
+    height: 50,
+    marginTop: 10,
+    marginLeft: 15,
+    marginRight: 15,
+    marginBottom: 0
   },
-  viewIcon: {
-    width: DeviceWidth * 0.2,
-    height: DeviceWidth * 0.2,
+  menuLabel: {
+    marginTop: 2,
     marginBottom: 10,
-    marginLeft: 10
+    fontSize: 12,
+    textAlign: 'center',
+    color: Colors.secondaryText
   }
 });
 
@@ -299,6 +316,9 @@ const styleSlider = StyleSheet.create({
   },
   thumb: {
     width: 50,
-    height: 50
+    height: 50,
+    fontSize: 12,
+    textAlign: 'center',
+    color: Colors.secondaryText
   }
 });

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "PetShop-ReactNative",
-    "slug": "PetShop-ReactNative",
+    "name": "PetLover",
+    "slug": "PetLover",
     "privacy": "public",
     "sdkVersion": "32.0.0",
     "platforms": [
