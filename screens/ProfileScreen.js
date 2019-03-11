@@ -121,8 +121,8 @@ export default class ProfileScreen extends Component {
     });
   };
 
-  componentDidMount() {
-    AsyncStorage.getItem('userToken', (error, result) => {
+  _showData = async () =>  {
+    await AsyncStorage.getItem('userToken', (error, result) => {
         if (result) {
           const ref = firebase.firestore().collection('user').doc(result);
           ref.get().then((doc) => {
@@ -143,6 +143,10 @@ export default class ProfileScreen extends Component {
           });
         }
     });
+  };
+
+  componentDidMount() {
+    this._showData();
   }
 
   renderDefault = () => {

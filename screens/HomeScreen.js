@@ -73,13 +73,12 @@ export default class HomeScreen extends React.Component {
   onCollectionUpdate = querySnapshot => {
     const boards = [];
     querySnapshot.forEach(doc => {
-      const { title, description, author } = doc.data();
+      const { title, kategori } = doc.data();
       boards.push({
         key: doc.id,
         doc, // DocumentSnapshot
         title,
-        description,
-        author
+        kategori
       });
     });
     this.setState({

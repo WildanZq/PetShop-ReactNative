@@ -28,6 +28,7 @@ import {
 } from 'native-base'
 import firebase from "../../Firebase";
 import { LinearGradient } from 'expo';
+import { StackActions, NavigationActions } from 'react-navigation';
 
 import Spinner from '../../components/common/Spinner';
 
@@ -118,7 +119,11 @@ export default class LoginScreen extends React.Component {
   constructor() {
     super();
     this.ref = firebase.firestore().collection('user');
-    this.state = { text: 'Useless Placeholder' };
+    const resetAction = StackActions.reset({
+      index: 0,
+      actions: [NavigationActions.navigate({ routeName: 'Main' })],
+    });
+    this.state = { text: 'Useless Placeholder', resetNav: resetAction };
   }
 
   state = { fontLoaded: false, email: '', password: '', loading: false };
@@ -256,7 +261,7 @@ export default class LoginScreen extends React.Component {
 
   onLoginSuccess() {
     this.setState({ email: '', password: '', loading: false });
-    this.props.navigation.navigate('Main');
+    this.props.navigation.dispatch(this.state.resetNav);
   }
 
   _signInFacebook = async () => {
@@ -309,7 +314,7 @@ export default class LoginScreen extends React.Component {
         });
 
         Alert.alert('Logged in!', `Hi ${(await alertPrint.json()).name}!`);
-        this.props.navigation.navigate('Main');
+        this.props.navigation.dispatch(this.state.resetNav);
       }
       case 'cancel': { }
     }
