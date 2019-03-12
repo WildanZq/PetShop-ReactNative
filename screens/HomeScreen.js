@@ -7,8 +7,10 @@ import {
   ActivityIndicator,
   FlatList,
   NetInfo,
-  RefreshControl
+  RefreshControl,
+  Keyboard
 } from "react-native";
+import { Input } from 'react-native-elements';
 import {
   View,
   Text,
@@ -21,43 +23,13 @@ import {
 } from "native-base";
 import Swiper from 'react-native-swiper';
 import Colors from '../constants/Colors';
-import SearchInput from '../components/SearchInput';
 import firebase from "../Firebase";
 import ProductItem from "../components/ProductItem";
+import SearchInput from '../components/SearchInput';
 
 export default class HomeScreen extends React.Component {
-  static navigationOptions = {
-    headerStyle: {
-      backgroundColor: Colors.primary,
-    },
-    headerTitle:
-      <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 10 }}>
-        <View style={{ flex: .125, alignItems: 'center' }}>
-          <Image
-            style={{ width: 35, height: 35 }}
-            source={require('../assets/images/icon-transparent.png')}
-          />
-        </View>
-        <View style={{ flex: .75 }} >
-          <TouchableOpacity activeOpacity={1} onPress={() => console.log('search clicked')} >
-            <SearchInput editable={true} />
-          </TouchableOpacity>
-        </View>
-        <View style={{ flex: .125, alignItems: 'center' }}>
-          <TouchableOpacity onPress={() => console.log('cart clicked')} >
-            <Icon
-              name='md-cart'
-              size={50}
-              style={{ color: '#fff' }}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-  };
-
   constructor() {
     super();
-    this.ref = firebase.firestore().collection("boards");
     NetInfo.isConnected.fetch().done((isConnected) => {
         if ( isConnected ) { firebase.firestore().enableNetwork(); }
         else { firebase.firestore().disableNetwork(); }
@@ -66,9 +38,63 @@ export default class HomeScreen extends React.Component {
     this.state = {
       isLoading: true,
       isFetching: false,
+      kataKunci: '',
       boards: []
     };
+    this.ref = firebase.firestore().collection("boards");
+    //firebase.firestore().collection("boards").where('title', '==', this.state.kataKunci)
   }
+
+  static navigationOptions =  ({ navigation }) => {
+      const {params = {}} = navigation.state;
+       return {
+         headerStyle: {
+           backgroundColor: Colors.primary,
+         },
+         headerTitle:
+           <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 10 }}>
+             <View style={{ flex: .125, alignItems: 'center' }}>
+               <Image
+                 style={{ width: 35, height: 35 }}
+                 source={require('../assets/images/icon-transparent.png')}
+               />
+             </View>
+             <View style={{ flex: .75 }} >
+               <TouchableOpacity activeOpacity={1} onPress={() => console.log('search clicked')} >
+               <SearchInput
+               value={params.kataKunci}
+               onChange={event => params.handleThis(event.nativeEvent.text) }
+               selectTextOnFocus={true}
+               onSubmitEditing={event => params.handleThis(event.nativeEvent.text) }
+               editable={true} />
+               </TouchableOpacity>
+             </View>
+             <View style={{ flex: .125, alignItems: 'center' }}>
+               <TouchableOpacity onPress={() => console.log('cart clicked')} >
+                 <Icon
+                   name='md-cart'
+                   size={50}
+                   style={{ color: '#fff' }}
+                 />
+               </TouchableOpacity>
+             </View>
+           </View>
+       }
+    }
+
+    onChangeSearch = (value) => {
+      this.setState({
+        kataKunci: value,
+      });
+      if (value) {
+        this.ref = firebase.firestore().collection('boards').orderBy('title').startAt(value).endAt(value+'\uf8ff');
+        this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
+      }
+      else{
+        this.ref = firebase.firestore().collection("boards");
+        this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
+      }
+    };
 
   onCollectionUpdate = querySnapshot => {
     const boards = [];
@@ -88,11 +114,104 @@ export default class HomeScreen extends React.Component {
   };
 
   componentDidMount() {
+    this.props.navigation.setParams({
+            handleThis: this.onChangeSearch
+        });
     this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
   }
 
   componentWillUnmount() {
     this.isCancelled = true;
+  }
+
+  renderHeadLayout() {
+    return (
+      <View>
+        <View style={{height:160}}>
+          <Swiper showsButtons={true} autoplay={true}>
+            <View style={styleSlider.slide1}>
+            <Image
+              style={{width: 400, height: 300}}
+              source={{uri: 'https://www.barnesandnoble.com/blog/sci-fi-fantasy/wp-content/uploads/sites/4/2017/07/onepiece2.jpg'}}
+            />
+            </View>
+            <View style={styleSlider.slide2}>
+              <Text style={styleSlider.text}>Beautiful</Text>
+            </View>
+            <View style={styleSlider.slide3}>
+              <Text style={styleSlider.text}>And simple</Text>
+            </View>
+          </Swiper>
+        </View>
+
+
+        <Card
+          style={{
+            flexDirection: "row",
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            height: "auto",
+            elevation: 1.5,
+            marginTop: 0,
+            marginRight: 0,
+            marginLeft: 0,
+            flexWrap: 'wrap',
+            paddingVertical: 16,
+            paddingHorizontal: 14
+          }}
+        >
+          <View>
+            <TouchableOpacity style={styles.menuIcon}>
+              <Icon type="MaterialIcons" name="pets" size={18} style={{ color: '#ffc956' }} />
+            </TouchableOpacity>
+            <Text style={styles.menuLabel}>Adopsi</Text>
+          </View>
+          <View>
+            <TouchableOpacity style={styles.menuIcon}>
+              <Icon type="MaterialCommunityIcons" name="food" size={18} style={{ color: "#3ebc42" }} />
+            </TouchableOpacity>
+            <Text style={styles.menuLabel}>Makanan</Text>
+          </View>
+          <View>
+            <TouchableOpacity style={styles.menuIcon}>
+              <Icon type="MaterialCommunityIcons" name="tshirt-crew" size={18} style={{ color: '#d2e524' }} />
+            </TouchableOpacity>
+            <Text style={styles.menuLabel}>Aksesoris</Text>
+          </View>
+          <View>
+            <TouchableOpacity style={styles.menuIcon}>
+              <Icon type="Ionicons" name="ios-baseball" size={18} style={{ color: '#942bb5' }} />
+            </TouchableOpacity>
+            <Text style={styles.menuLabel}>Mainan</Text>
+          </View>
+          <View>
+            <TouchableOpacity style={styles.menuIcon}>
+              <Icon type="FontAwesome" name="stethoscope" size={18} style={{ color: '#359fa3' }} />
+            </TouchableOpacity>
+            <Text style={styles.menuLabel}>Kesehatan</Text>
+          </View>
+          <View>
+            <TouchableOpacity style={styles.menuIcon}>
+              <Icon type="MaterialCommunityIcons" name="pill" size={18} style={{ color: '#c62121' }} />
+            </TouchableOpacity>
+            <Text style={styles.menuLabel}>Suplemen</Text>
+          </View>
+          <View>
+            <TouchableOpacity style={styles.menuIcon}>
+              <Icon type="MaterialCommunityIcons" name="lightbulb-on-outline" size={18} style={{ color: '#147cd1' }} />
+            </TouchableOpacity>
+            <Text style={styles.menuLabel}>Tips</Text>
+          </View>
+          <View>
+            <TouchableOpacity style={styles.menuIcon}>
+              <Icon type="MaterialCommunityIcons" name="dog-side" size={18} style={{ color: '#a58c0b' }} />
+            </TouchableOpacity>
+            <Text style={styles.menuLabel}>Terlantar</Text>
+          </View>
+        </Card>
+      </View>
+    );
   }
 
   render() {
@@ -105,88 +224,11 @@ export default class HomeScreen extends React.Component {
           />
         }
         showsVerticalScrollIndicator={false}>
-          <View style={{height:160}}>
-            <Swiper showsButtons={true} autoplay={true}>
-              <View style={styleSlider.slide1}>
-              <Image
-                style={{width: 400, height: 300}}
-                source={{uri: 'https://www.barnesandnoble.com/blog/sci-fi-fantasy/wp-content/uploads/sites/4/2017/07/onepiece2.jpg'}}
-              />
-              </View>
-              <View style={styleSlider.slide2}>
-                <Text style={styleSlider.text}>Beautiful</Text>
-              </View>
-              <View style={styleSlider.slide3}>
-                <Text style={styleSlider.text}>And simple</Text>
-              </View>
-            </Swiper>
-          </View>
+          {this.renderHeadLayout()}
 
-          <Card
-            style={{
-              flexDirection: "row",
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              height: "auto",
-              elevation: 1.5,
-              marginTop: 0,
-              marginRight: 0,
-              marginLeft: 0,
-              flexWrap: 'wrap',
-              paddingVertical: 16,
-              paddingHorizontal: 14
-            }}
-          >
-            <View>
-              <TouchableOpacity style={styles.menuIcon}>
-                <Icon type="MaterialIcons" name="pets" size={18} style={{ color: '#ffc956' }} />
-              </TouchableOpacity>
-              <Text style={styles.menuLabel}>Adopsi</Text>
-            </View>
-            <View>
-              <TouchableOpacity style={styles.menuIcon}>
-                <Icon type="MaterialCommunityIcons" name="food" size={18} style={{ color: "#3ebc42" }} />
-              </TouchableOpacity>
-              <Text style={styles.menuLabel}>Makanan</Text>
-            </View>
-            <View>
-              <TouchableOpacity style={styles.menuIcon}>
-                <Icon type="MaterialCommunityIcons" name="tshirt-crew" size={18} style={{ color: '#d2e524' }} />
-              </TouchableOpacity>
-              <Text style={styles.menuLabel}>Aksesoris</Text>
-            </View>
-            <View>
-              <TouchableOpacity style={styles.menuIcon}>
-                <Icon type="Ionicons" name="ios-baseball" size={18} style={{ color: '#942bb5' }} />
-              </TouchableOpacity>
-              <Text style={styles.menuLabel}>Mainan</Text>
-            </View>
-            <View>
-              <TouchableOpacity style={styles.menuIcon}>
-                <Icon type="FontAwesome" name="stethoscope" size={18} style={{ color: '#359fa3' }} />
-              </TouchableOpacity>
-              <Text style={styles.menuLabel}>Kesehatan</Text>
-            </View>
-            <View>
-              <TouchableOpacity style={styles.menuIcon}>
-                <Icon type="MaterialCommunityIcons" name="pill" size={18} style={{ color: '#c62121' }} />
-              </TouchableOpacity>
-              <Text style={styles.menuLabel}>Suplemen</Text>
-            </View>
-            <View>
-              <TouchableOpacity style={styles.menuIcon}>
-                <Icon type="MaterialCommunityIcons" name="lightbulb-on-outline" size={18} style={{ color: '#147cd1' }} />
-              </TouchableOpacity>
-              <Text style={styles.menuLabel}>Tips</Text>
-            </View>
-            <View>
-              <TouchableOpacity style={styles.menuIcon}>
-                <Icon type="MaterialCommunityIcons" name="dog-side" size={18} style={{ color: '#a58c0b' }} />
-              </TouchableOpacity>
-              <Text style={styles.menuLabel}>Terlantar</Text>
-            </View>
-          </Card>
+          <View>
+        <Text>TEST: {this.state.kataKunci}</Text>
+      </View>
 
           <View style={{ paddingLeft: 10 }}>
             <Text style={{ color: Colors.primaryText, fontSize: 18, marginTop: 20 }}>Rekomendasi untuk Anda</Text>
