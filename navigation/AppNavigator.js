@@ -7,6 +7,7 @@ import LoginScreen from '../screens/login/LoginScreen';
 import SignupScreen from '../screens/login/SignupScreen';
 import DetailBarangScreen from '../screens/barang/DetailBarangScreen';
 import PesanBarangScreen from '../screens/barang/PesanBarangScreen';
+import AddProductScreen from '../screens/AddProductScreen';
 
 const doNotShowHeaderOption = {
   navigationOptions: {
@@ -24,6 +25,7 @@ const AppStack = createStackNavigator(
     SignUp: SignupScreen,
     DetailBarang: DetailBarangScreen,
     PesanBarang: PesanBarangScreen,
+    AddProduct: AddProductScreen
   }
 );
 
