@@ -28,6 +28,9 @@ import {
 } from 'native-base'
 import firebase from "../../Firebase";
 import { LinearGradient } from 'expo';
+import { StackActions, NavigationActions } from 'react-navigation';
+
+import Spinner from '../../components/common/Spinner';
 
 const deviceWidth = Dimensions.get('window').width;
 const deviceHeight = Dimensions.get('window').height;
@@ -45,10 +48,11 @@ const styles = StyleSheet.create({
     fontFamily: "Roboto",
     fontSize: 12,
     fontWeight: "100",
+    marginBottom: 5
   },
   inputStyle: {
     fontFamily: "Roboto",
-    fontSize: 14,
+    fontSize: 14
   },
   form: {
     width: 0.85 * deviceWidth,
@@ -115,12 +119,14 @@ export default class LoginScreen extends React.Component {
   constructor() {
     super();
     this.ref = firebase.firestore().collection('user');
-    this.state = { text: 'Useless Placeholder' };
+    const resetAction = StackActions.reset({
+      index: 0,
+      actions: [NavigationActions.navigate({ routeName: 'Main' })],
+    });
+    this.state = { text: 'Useless Placeholder', resetNav: resetAction };
   }
 
-  state = {
-    fontLoaded: false,
-  };
+  state = { fontLoaded: false, email: '', password: '', loading: false };
 
   static navigationOptions = {
     header: null,
@@ -148,40 +154,37 @@ export default class LoginScreen extends React.Component {
             <Image source={require('../../assets/images/pl-logo.png')} style={{ width: 100, height: 100, borderRadius: 15 }}/>
           </Row>
           <Row size={1} style={[styles.container]}>
-          <Text style={styles.loginText}>Sign In</Text>
+          <Text style={styles.loginText}>Pet Shop</Text>
           </Row>
           <Row size={6}  style={ [styles.container, { alignItems: 'flex-start'}] }>
             <View style={[ styles.form, {alignItems: 'center'} ]}>
               <Input
-                label='Username or Email'
+                value={this.state.email}
+                onChange={event => this.setState({ email: event.nativeEvent.text })}
+                keyboardType='email-address'
+                label='Email'
                 placeholder="john@example.com"
                 inputContainerStyle={ [styles.inputContainer] }
                 containerStyle={{marginTop: 10}}
                 inputStyle={styles.inputStyle}
-                labelStyle={[styles.inputLabel]}/>
+                labelStyle={[styles.inputLabel]}
+                onSubmitEditing={this._signInWithEmail} />
               <Input
+                value={this.state.password}
+                onChange={event => this.setState({ password: event.nativeEvent.text })}
                 secureTextEntry={true}
                 autoCapitalize='none'
                 label='Password'
-                placeholder="Password"
+                placeholder="******"
                 inputContainerStyle={ [styles.inputContainer] }
                 containerStyle={{marginTop: 20}}
                 inputStyle={styles.inputStyle}
-                labelStyle={[styles.inputLabel]}/>
-              <Button
-                ViewComponent={LinearGradient}
-                linearGradientProps={{
-                  colors: ['#90F7EC', '#32CCBC'],
-                  start: { x: 0, y: 0 },
-                  end: { x: 1, y: 0 },
-                }}
-                title="Sign in"
-                buttonStyle={[styles.button]}
-                onPress={this._signInFacebook}
-              />
+                labelStyle={[styles.inputLabel]}
+                onSubmitEditing={this._signInWithEmail} />
+              { this.renderButton() }
               <View flexDirection="row" style={{alignItems: 'center'}}>
                 <View style={styles.divider}/>
-                <Text style={styles.dividerText}>OR</Text>
+                <Text style={styles.dividerText}>ATAU</Text>
                 <View style={styles.divider}/>
               </View>
               <Button
@@ -210,6 +213,57 @@ export default class LoginScreen extends React.Component {
     );
   }
 
+  renderButton() {
+    if (this.state.loading) {
+      return <Spinner size='small' />;
+    }
+
+    return (
+      <Button
+        ViewComponent={LinearGradient}
+        linearGradientProps={{
+          colors: ['#90F7EC', '#32CCBC'],
+          start: { x: 0, y: 0 },
+          end: { x: 1, y: 0 },
+        }}
+        title="Sign in"
+        buttonStyle={[styles.button]}
+        onPress={this._signInWithEmail}
+      />
+    );
+  }
+
+  _signInWithEmail = async () => {
+    const { email, password } = this.state;
+
+    if (!email || !password) {
+      Alert.alert('Gagal', 'Masukkan Email dan Password');
+      return;
+    }
+
+    this.setState({ loading: true });
+
+    await firebase.auth().signInWithEmailAndPassword(email, password)
+      .then((userData) => {
+          AsyncStorage.setItem('userToken', userData.user.uid);
+      })
+      .then(this.onLoginSuccess.bind(this))
+      .catch((error) => {
+        this.onLoginFail();
+      }
+    );
+  }
+
+  onLoginFail() {
+    this.setState({ loading: false });
+    Alert.alert('Gagal', 'Email atau Password salah');
+  }
+
+  onLoginSuccess() {
+    this.setState({ email: '', password: '', loading: false });
+    this.props.navigation.dispatch(this.state.resetNav);
+  }
+
   _signInFacebook = async () => {
     const appId = '2160043080729166';
 
@@ -220,7 +274,7 @@ export default class LoginScreen extends React.Component {
       permissions,
       declinedPermissions,
     } = await Facebook.logInWithReadPermissionsAsync(appId, {
-      permissions: ['public_profile', 'user_gender', 'user_birthday'],
+      permissions: ['public_profile'],
     });
 
     switch (type) {
@@ -229,7 +283,7 @@ export default class LoginScreen extends React.Component {
 
         const credential = firebase.auth.FacebookAuthProvider.credential(token);
         const facebookProfileData = await firebase.auth().signInAndRetrieveDataWithCredential(credential);
-        const graphApi = `https://graph.facebook.com/v3.2/me?fields=id,name,birthday,email,gender,picture.type(large)&access_token=${token}`;
+        const graphApi = `https://graph.facebook.com/v3.2/me?fields=id,name,email,picture.type(large)&access_token=${token}`;
         const alertPrint = await fetch(graphApi);
 
         firebase.auth().onAuthStateChanged((user) => {
@@ -248,8 +302,6 @@ export default class LoginScreen extends React.Component {
                       email: user.email,
                       nama: `${response.name}`,
                       foto: `${response.picture.data.url}`,
-                      gender: `${response.gender}`,
-                      tgl_lahir: `${response.birthday}`,
                     })
                     .catch((error) => {
                       console.error("Error adding user: ", error);
@@ -262,7 +314,7 @@ export default class LoginScreen extends React.Component {
         });
 
         Alert.alert('Logged in!', `Hi ${(await alertPrint.json()).name}!`);
-        this.props.navigation.navigate('AuthLoading');
+        this.props.navigation.dispatch(this.state.resetNav);
       }
       case 'cancel': { }
     }

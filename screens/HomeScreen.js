@@ -1,67 +1,35 @@
-import React, { Component } from "react";
+import React from "react";
 import {
   Image,
-  Platform,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
   FlatList,
-  AsyncStorage,
   NetInfo,
-  RefreshControl
+  RefreshControl,
+  Keyboard
 } from "react-native";
-import { Col, Row, Grid } from "react-native-easy-grid";
+import { Input } from 'react-native-elements';
 import {
   View,
   Text,
-  Container,
-  Header,
   Content,
   Card,
   CardItem,
-  Body,
   Icon,
   Left,
-  Right,
-  Title,
-  Button,
-  Item,
-  Input,
-  Thumbnail,
-  Badge
+  Thumbnail
 } from "native-base";
-import { Dimensions } from "react-native";
-import { MonoText } from "../components/StyledText";
 import Swiper from 'react-native-swiper';
+import Colors from '../constants/Colors';
 import firebase from "../Firebase";
-
-const DeviceWidth = Dimensions.get("window").width;
+import ProductItem from "../components/ProductItem";
+import SearchInput from '../components/SearchInput';
 
 export default class HomeScreen extends React.Component {
-  static navigationOptions = {
-    //header: null
-    headerStyle: {
-      backgroundColor: '#29B6F6',
-    },
-    headerTitle:
-          <Grid>
-            <Row>
-            <Col style={{width:80, marginTop:18}}><Text style={{color: '#fff'}}> LOGO</Text></Col>
-            <Col>
-              <Item rounded style={{marginTop:9, width:195, height:36}}>
-                <Input placeholder='Search' placeholderTextColor='#fff'/>
-              </Item>
-            </Col>
-            <Col style={{marginTop:13, width: 50, color: '#fff'}}>
-                <Icon style={{color: '#fff'}} name='cart' />
-            </Col>
-            </Row>
-          </Grid>,
-  };
   constructor() {
     super();
-    this.ref = firebase.firestore().collection("boards");
     NetInfo.isConnected.fetch().done((isConnected) => {
         if ( isConnected ) { firebase.firestore().enableNetwork(); }
         else { firebase.firestore().disableNetwork(); }
@@ -70,20 +38,73 @@ export default class HomeScreen extends React.Component {
     this.state = {
       isLoading: true,
       isFetching: false,
+      kataKunci: '',
       boards: []
     };
+    this.ref = firebase.firestore().collection("boards");
+    //firebase.firestore().collection("boards").where('title', '==', this.state.kataKunci)
   }
+
+  static navigationOptions =  ({ navigation }) => {
+      const {params = {}} = navigation.state;
+       return {
+         headerStyle: {
+           backgroundColor: Colors.primary,
+         },
+         headerTitle:
+           <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 10 }}>
+             <View style={{ flex: .125, alignItems: 'center' }}>
+               <Image
+                 style={{ width: 35, height: 35 }}
+                 source={require('../assets/images/icon-transparent.png')}
+               />
+             </View>
+             <View style={{ flex: .75 }} >
+               <TouchableOpacity activeOpacity={1} onPress={() => console.log('search clicked')} >
+               <SearchInput
+               value={params.kataKunci}
+               onChange={event => params.handleThis(event.nativeEvent.text) }
+               selectTextOnFocus={true}
+               onSubmitEditing={event => params.handleThis(event.nativeEvent.text) }
+               editable={true} />
+               </TouchableOpacity>
+             </View>
+             <View style={{ flex: .125, alignItems: 'center' }}>
+               <TouchableOpacity onPress={() => console.log('cart clicked')} >
+                 <Icon
+                   name='md-cart'
+                   size={50}
+                   style={{ color: '#fff' }}
+                 />
+               </TouchableOpacity>
+             </View>
+           </View>
+       }
+    }
+
+    onChangeSearch = (value) => {
+      this.setState({
+        kataKunci: value,
+      });
+      if (value) {
+        this.ref = firebase.firestore().collection('boards').orderBy('title').startAt(value).endAt(value+'\uf8ff');
+        this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
+      }
+      else{
+        this.ref = firebase.firestore().collection("boards");
+        this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
+      }
+    };
 
   onCollectionUpdate = querySnapshot => {
     const boards = [];
     querySnapshot.forEach(doc => {
-      const { title, description, author } = doc.data();
+      const { title, kategori } = doc.data();
       boards.push({
         key: doc.id,
         doc, // DocumentSnapshot
         title,
-        description,
-        author
+        kategori
       });
     });
     this.setState({
@@ -93,6 +114,9 @@ export default class HomeScreen extends React.Component {
   };
 
   componentDidMount() {
+    this.props.navigation.setParams({
+            handleThis: this.onChangeSearch
+        });
     this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
   }
 
@@ -100,138 +124,141 @@ export default class HomeScreen extends React.Component {
     this.isCancelled = true;
   }
 
-  _renderItem = ({item}) => (
-    <Content>
-    <Card style={{ flex: 0, margin: 5, backgroundColor: '#ddd', height: "auto"}}>
-      <CardItem>
-        <Left>
-          <Thumbnail source={{uri: 'https://www.barnesandnoble.com/blog/sci-fi-fantasy/wp-content/uploads/sites/4/2017/07/onepiece2.jpg'}} />
-          <Body>
-            <Text>{item.title}</Text>
-            <Text note>bl4ckck</Text>
-          </Body>
-        </Left>
-      </CardItem>
-      <CardItem cardBody>
-        <Image source={{uri: 'https://www.barnesandnoble.com/blog/sci-fi-fantasy/wp-content/uploads/sites/4/2017/07/onepiece2.jpg'}} style={{height: 200, width: null, flex: 1}}/>
-      </CardItem>
-      <CardItem>
-        <Left>
-        <Body>
-          <Text note>{item.key}</Text>
-        </Body>
-        </Left>
-      </CardItem>
-    </Card>
-    </Content>
-  );
+  renderHeadLayout() {
+    return (
+      <View>
+        <View style={{height:160}}>
+          <Swiper showsButtons={true} autoplay={true}>
+            <View style={styleSlider.slide1}>
+            <Image
+              style={{width: 400, height: 300}}
+              source={{uri: 'https://www.barnesandnoble.com/blog/sci-fi-fantasy/wp-content/uploads/sites/4/2017/07/onepiece2.jpg'}}
+            />
+            </View>
+            <View style={styleSlider.slide2}>
+              <Text style={styleSlider.text}>Beautiful</Text>
+            </View>
+            <View style={styleSlider.slide3}>
+              <Text style={styleSlider.text}>And simple</Text>
+            </View>
+          </Swiper>
+        </View>
+
+
+        <Card
+          style={{
+            flexDirection: "row",
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            height: "auto",
+            elevation: 1.5,
+            marginTop: 0,
+            marginRight: 0,
+            marginLeft: 0,
+            flexWrap: 'wrap',
+            paddingVertical: 16,
+            paddingHorizontal: 14
+          }}
+        >
+          <View>
+            <TouchableOpacity style={styles.menuIcon}>
+              <Icon type="MaterialIcons" name="pets" size={18} style={{ color: '#ffc956' }} />
+            </TouchableOpacity>
+            <Text style={styles.menuLabel}>Adopsi</Text>
+          </View>
+          <View>
+            <TouchableOpacity style={styles.menuIcon}>
+              <Icon type="MaterialCommunityIcons" name="food" size={18} style={{ color: "#3ebc42" }} />
+            </TouchableOpacity>
+            <Text style={styles.menuLabel}>Makanan</Text>
+          </View>
+          <View>
+            <TouchableOpacity style={styles.menuIcon}>
+              <Icon type="MaterialCommunityIcons" name="tshirt-crew" size={18} style={{ color: '#d2e524' }} />
+            </TouchableOpacity>
+            <Text style={styles.menuLabel}>Aksesoris</Text>
+          </View>
+          <View>
+            <TouchableOpacity style={styles.menuIcon}>
+              <Icon type="Ionicons" name="ios-baseball" size={18} style={{ color: '#942bb5' }} />
+            </TouchableOpacity>
+            <Text style={styles.menuLabel}>Mainan</Text>
+          </View>
+          <View>
+            <TouchableOpacity style={styles.menuIcon}>
+              <Icon type="FontAwesome" name="stethoscope" size={18} style={{ color: '#359fa3' }} />
+            </TouchableOpacity>
+            <Text style={styles.menuLabel}>Kesehatan</Text>
+          </View>
+          <View>
+            <TouchableOpacity style={styles.menuIcon}>
+              <Icon type="MaterialCommunityIcons" name="pill" size={18} style={{ color: '#c62121' }} />
+            </TouchableOpacity>
+            <Text style={styles.menuLabel}>Suplemen</Text>
+          </View>
+          <View>
+            <TouchableOpacity style={styles.menuIcon}>
+              <Icon type="MaterialCommunityIcons" name="lightbulb-on-outline" size={18} style={{ color: '#147cd1' }} />
+            </TouchableOpacity>
+            <Text style={styles.menuLabel}>Tips</Text>
+          </View>
+          <View>
+            <TouchableOpacity style={styles.menuIcon}>
+              <Icon type="MaterialCommunityIcons" name="dog-side" size={18} style={{ color: '#a58c0b' }} />
+            </TouchableOpacity>
+            <Text style={styles.menuLabel}>Terlantar</Text>
+          </View>
+        </Card>
+      </View>
+    );
+  }
 
   render() {
+    return (
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={this.state.isFetching}
+            onRefresh={() => firebase.firestore().enableNetwork()}
+          />
+        }
+        showsVerticalScrollIndicator={false}>
+          {this.renderHeadLayout()}
+
+          <View>
+        <Text>TEST: {this.state.kataKunci}</Text>
+      </View>
+
+          <View style={{ paddingLeft: 10 }}>
+            <Text style={{ color: Colors.primaryText, fontSize: 18, marginTop: 20 }}>Rekomendasi untuk Anda</Text>
+          </View>
+
+          {this.renderProductList()}
+      </ScrollView>
+    );
+  }
+
+  renderProductList() {
     if (this.state.isLoading) {
       return (
-        <View style={styles.activity}>
-          <ActivityIndicator size="large" color="#0000ff" />
+        <View style={{ marginTop: 12 }}>
+          <ActivityIndicator size='small' color={Colors.primary} />
         </View>
       );
     }
 
-    return (
-      <ScrollView
-      refreshControl={
-          <RefreshControl
-           refreshing={this.state.isFetching}
-           onRefresh={() => firebase.firestore().enableNetwork()}
-          />
-        }
-      showsVerticalScrollIndicator={false}>
-        <View style={{height:200}}>
-            <Swiper showsButtons={true} autoplay={true}>
-              <View style={styleSlider.slide1}>
-              <Image
-                  style={{width: 400, height: 300}}
-                  source={{uri: 'https://www.barnesandnoble.com/blog/sci-fi-fantasy/wp-content/uploads/sites/4/2017/07/onepiece2.jpg'}}
-              />
-              </View>
-              <View style={styleSlider.slide2}>
-                <Text style={styleSlider.text}>Beautiful</Text>
-              </View>
-              <View style={styleSlider.slide3}>
-                <Text style={styleSlider.text}>And simple</Text>
-              </View>
-            </Swiper>
-        </View>
-
-          <Card
-            style={{
-              flexDirection: "row",
-              flex: 0,
-              justifyContent: "center",
-              alignItems: "center",
-              height: "auto"
-            }}
-          >
-            <View style={{marginTop:20}}>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="home" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="adjust" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
-            </View>
-            <View style={{marginTop:20}}>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="anchor" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="archive" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
-            </View>
-            <View style={{marginTop:20}}>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="database" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="home" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
-            </View>
-            <View style={{marginTop:20}}>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="home" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.menuIcon}>
-                  <Icon type="FontAwesome" name="gavel" size={30} color="#01a699" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Card>
-
-          <View>
-            <Text>{"\n\n"} Recommended for you{"\n"}</Text>
-          </View>
-
-          <FlatList
-            data={this.state.boards}
-            renderItem={this._renderItem} //method to render the data in the way you want using styling u need
-            horizontal={false}
-            numColumns={2}
-          />
-      </ScrollView>
-    );
+    return (<FlatList
+      style={{ padding: 5 }}
+      data={this.state.boards}
+      renderItem={({ item }) => (
+        <ProductItem
+          navigation={this.props.navigation}
+          data={item} />
+      )}
+      horizontal={false}
+      numColumns={2}
+    />);
   }
 
   _maybeRenderDevelopmentModeWarning() {
@@ -271,32 +298,25 @@ export default class HomeScreen extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  activity: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    alignItems: "center",
-    justifyContent: "center"
-  },
-  iconColor1: {
-    backgroundColor: "red"
-  },
   menuIcon: {
     borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.2)",
+    borderColor: Colors.divider,
     alignItems: "center",
     justifyContent: "center",
-    width: 40,
-    height: 40,
-    borderRadius: 100
+    borderRadius: 12,
+    width: 50,
+    height: 50,
+    marginTop: 10,
+    marginLeft: 15,
+    marginRight: 15,
+    marginBottom: 0
   },
-  viewIcon: {
-    width: DeviceWidth * 0.2,
-    height: DeviceWidth * 0.2,
+  menuLabel: {
+    marginTop: 2,
     marginBottom: 10,
-    marginLeft: 10
+    fontSize: 12,
+    textAlign: 'center',
+    color: Colors.secondaryText
   }
 });
 
@@ -329,6 +349,9 @@ const styleSlider = StyleSheet.create({
   },
   thumb: {
     width: 50,
-    height: 50
+    height: 50,
+    fontSize: 12,
+    textAlign: 'center',
+    color: Colors.secondaryText
   }
 });
