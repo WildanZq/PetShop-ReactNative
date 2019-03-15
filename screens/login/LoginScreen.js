@@ -28,6 +28,7 @@ import {
 } from 'native-base'
 import firebase from "../../Firebase";
 import { LinearGradient } from 'expo';
+import { StackActions, NavigationActions } from 'react-navigation';
 
 import Spinner from '../../components/common/Spinner';
 
@@ -118,7 +119,11 @@ export default class LoginScreen extends React.Component {
   constructor() {
     super();
     this.ref = firebase.firestore().collection('user');
-    this.state = { text: 'Useless Placeholder' };
+    const resetAction = StackActions.reset({
+      index: 0,
+      actions: [NavigationActions.navigate({ routeName: 'Main' })],
+    });
+    this.state = { text: 'Useless Placeholder', resetNav: resetAction };
   }
 
   state = { fontLoaded: false, email: '', password: '', loading: false };
@@ -162,7 +167,8 @@ export default class LoginScreen extends React.Component {
                 inputContainerStyle={ [styles.inputContainer] }
                 containerStyle={{marginTop: 10}}
                 inputStyle={styles.inputStyle}
-                labelStyle={[styles.inputLabel]}/>
+                labelStyle={[styles.inputLabel]}
+                onSubmitEditing={this._signInWithEmail} />
               <Input
                 value={this.state.password}
                 onChange={event => this.setState({ password: event.nativeEvent.text })}
@@ -173,7 +179,8 @@ export default class LoginScreen extends React.Component {
                 inputContainerStyle={ [styles.inputContainer] }
                 containerStyle={{marginTop: 20}}
                 inputStyle={styles.inputStyle}
-                labelStyle={[styles.inputLabel]}/>
+                labelStyle={[styles.inputLabel]}
+                onSubmitEditing={this._signInWithEmail} />
               { this.renderButton() }
               <View flexDirection="row" style={{alignItems: 'center'}}>
                 <View style={styles.divider}/>
@@ -237,12 +244,14 @@ export default class LoginScreen extends React.Component {
     this.setState({ loading: true });
 
     await firebase.auth().signInWithEmailAndPassword(email, password)
+      .then((userData) => {
+          AsyncStorage.setItem('userToken', userData.user.uid);
+      })
       .then(this.onLoginSuccess.bind(this))
-      .catch(async () => {
-        await firebase.auth().createUserWithEmailAndPassword(email, password)
-          .then(this.onLoginSuccess.bind(this))
-          .catch(this.onLoginFail.bind(this));
-      });
+      .catch((error) => {
+        this.onLoginFail();
+      }
+    );
   }
 
   onLoginFail() {
@@ -252,7 +261,7 @@ export default class LoginScreen extends React.Component {
 
   onLoginSuccess() {
     this.setState({ email: '', password: '', loading: false });
-    this.props.navigation.navigate('App');
+    this.props.navigation.dispatch(this.state.resetNav);
   }
 
   _signInFacebook = async () => {
@@ -265,7 +274,7 @@ export default class LoginScreen extends React.Component {
       permissions,
       declinedPermissions,
     } = await Facebook.logInWithReadPermissionsAsync(appId, {
-      permissions: ['public_profile', 'user_gender', 'user_birthday'],
+      permissions: ['public_profile'],
     });
 
     switch (type) {
@@ -274,7 +283,7 @@ export default class LoginScreen extends React.Component {
 
         const credential = firebase.auth.FacebookAuthProvider.credential(token);
         const facebookProfileData = await firebase.auth().signInAndRetrieveDataWithCredential(credential);
-        const graphApi = `https://graph.facebook.com/v3.2/me?fields=id,name,birthday,email,gender,picture.type(large)&access_token=${token}`;
+        const graphApi = `https://graph.facebook.com/v3.2/me?fields=id,name,email,picture.type(large)&access_token=${token}`;
         const alertPrint = await fetch(graphApi);
 
         firebase.auth().onAuthStateChanged((user) => {
@@ -293,8 +302,6 @@ export default class LoginScreen extends React.Component {
                       email: user.email,
                       nama: `${response.name}`,
                       foto: `${response.picture.data.url}`,
-                      gender: `${response.gender}`,
-                      tgl_lahir: `${response.birthday}`,
                     })
                     .catch((error) => {
                       console.error("Error adding user: ", error);
@@ -307,7 +314,7 @@ export default class LoginScreen extends React.Component {
         });
 
         Alert.alert('Logged in!', `Hi ${(await alertPrint.json()).name}!`);
-        this.props.navigation.navigate('AuthLoading');
+        this.props.navigation.dispatch(this.state.resetNav);
       }
       case 'cancel': { }
     }
