@@ -11,6 +11,7 @@ import {
   Button,
   Icon,
 } from "native-base";
+import NumberFormat from 'react-number-format';
 
 const ProductItem = ({ navigation, data }) => {
   return (
@@ -31,8 +32,16 @@ const ProductItem = ({ navigation, data }) => {
           </CardItem>
           <CardItem style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
             <Text>{data.title}</Text>
-            <Text note>Rp 800.000{"\n\n"}</Text>
-            <Button rounded block small success>
+            <NumberFormat value={data.harga} displayType={'text'} thousandSeparator={'.'} decimalSeparator={','} prefix={'Rp'} 
+            renderText={value => <Text note>{value}{"\n\n"}</Text>} />
+            <Button rounded block small success
+            onPress={() =>
+              navigation.navigate("PesanBarang",
+              {
+                key: navigation.state.key,
+                boardKey:`${JSON.stringify(data.key)}`
+              }
+            )}>
               <Text>Beli</Text>
             </Button>
           </CardItem>

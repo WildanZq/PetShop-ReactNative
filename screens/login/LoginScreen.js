@@ -299,7 +299,7 @@ export default class LoginScreen extends React.Component {
                 .then(response => response.json())
                 .then((response) => {
                     this.ref.doc(`${user.uid}`).set({
-                      email: user.email,
+                      email: `${response.email}`,
                       nama: `${response.name}`,
                       foto: `${response.picture.data.url}`,
                     })

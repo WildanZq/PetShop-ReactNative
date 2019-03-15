@@ -1,5 +1,5 @@
 import React from 'react';
-import {AsyncStorage} from "react-native";
+import {AsyncStorage, Alert} from "react-native";
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   Input,
 } from "native-base";
 import { ExpoConfigView } from '@expo/samples';
+import firebase from "../../Firebase";
 
 export default class DetailBarangScreen extends React.Component {
   static navigationOptions = {
@@ -22,6 +23,8 @@ export default class DetailBarangScreen extends React.Component {
     this.state = {
       idDocument: '',
       token: '',
+      getBarang: {},
+      key: '',
     };
   }
 
@@ -29,9 +32,18 @@ export default class DetailBarangScreen extends React.Component {
     const { params } = this.props.navigation.state;
     const boardKey = params ? params.boardKey: null;
 
-    this.setState({
-      idDocument: `${JSON.parse(boardKey)}`,
-    });
+     const ref = firebase.firestore().collection('boards').doc(`${JSON.parse(boardKey)}`);
+     ref.get().then((doc) => {
+       if (doc.exists) {
+         this.setState({
+           getBarang: doc.data(),
+           key: doc.id,
+           isLoading: false,
+         });
+       } else {
+         console.log("No such document!");
+       }
+     });
 
     AsyncStorage.getItem('userToken', (error, result) => {
         if (result) {
@@ -42,31 +54,38 @@ export default class DetailBarangScreen extends React.Component {
     });
   }
 
-  _doSignIn = () => {
-      return (
-        <Button warning onPress={() => this.props.navigation.navigate('SignIn')}>
-            <Text>Login Terlebih Dahulu</Text>
-        </Button>
-      )
-  }
-  _doPayment = () => {
-      return (
-        <Button success onPress={() => this.props.navigation.goBack()}>
-            <Text>Beli Barang {this.state.idDocument}</Text>
-        </Button>
-      )
+  _doPayment() {
+    if(this.state.token=='') {
+      Alert.alert(
+        'Gagal',
+        'Silakan Login Terlebih Dahulu',
+        [
+          {text: 'Cancel', onPress: () => console.log('Cancel Pressed!')},
+          {text: 'OK', onPress: () => this.props.navigation.navigate("SignIn")},
+        ],
+        { cancelable: false }
+      );
+    }
+    else {
+      this.props.navigation.navigate("PesanBarang", {
+        key: this.props.navigation.state.key,
+        boardKey: this.state.key
+      })
+    }
   }
 
   render() {
     return (
         <View>
-          <Text>{this.state.idDocument}{"\n\n\n"} </Text>
+          <Text>{this.state.key}{"\n\n\n"} </Text>
+          <Text>{this.state.getBarang.title}{"\n\n\n"} </Text>
+          <Text>{this.state.getBarang.kategori}{"\n\n\n"} </Text>
+          <Text>{this.state.getBarang.harga}{"\n\n\n"} </Text>
 
-          {this.state.token ? (
-            this._doPayment()
-            ): (
-            this._doSignIn()
-          )}
+          <Button success 
+          onPress={() => this._doPayment() }>
+              <Text>Beli Barang {this.state.idDocument}</Text>
+          </Button>
         </View>
     );
   }

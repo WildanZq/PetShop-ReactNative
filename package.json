@@ -22,7 +22,8 @@
     "react-native-elements": "^1.1.0",
     "react-native-snap-carousel": "^3.7.5",
     "react-native-swiper": "^1.5.14",
-    "react-navigation": "^3.3.2"
+    "react-navigation": "^3.3.2",
+    "react-number-format": "^4.0.6"
   },
   "devDependencies": {
     "babel-preset-expo": "^5.0.0",
