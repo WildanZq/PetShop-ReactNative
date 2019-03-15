@@ -207,6 +207,22 @@ export default class SignupScreen extends React.Component {
                 buttonStyle={[styles.button]}
                 onPress={this._signInAsync}
               />
+              {/*<View flexDirection="row" style={{alignItems: 'center'}}>
+                <View style={styles.divider}/>
+                <Text style={styles.dividerText}>OR</Text>
+                <View style={styles.divider}/>
+              </View>
+              <Button
+                ViewComponent={LinearGradient}
+                linearGradientProps={{
+                  colors: ['#3C8CE7', '#00EAFF'],
+                  start: { x: 0, y: 0 },
+                  end: { x: 1, y: 0 },
+                }}
+                title="Sign in with Facebook"
+                buttonStyle={[styles.button, {marginTop: 0}]}
+                onPress={this._signInFacebook}
+              />*/}
               <View flexDirection="row" style={styles.signupView}>
                 <Text style={[styles.signupText]}>Already have an account? </Text>
                 <Text style={[styles.signupText, styles.createnow]} onPress={() => this.props.navigation.navigate('SignIn')}>Sign In</Text>

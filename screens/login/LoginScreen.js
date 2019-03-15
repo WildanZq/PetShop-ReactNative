@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     marginVertical: 25,
     backgroundColor: '#A2A2A2',
     height: StyleSheet.hairlineWidth,
-    width: 0.3 * deviceWidth,
+    width: 0.35 * deviceWidth,
   },
   dividerText: {
     fontFamily: "Roboto",
