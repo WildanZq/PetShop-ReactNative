@@ -127,7 +127,7 @@ export default class AddProductScreen extends React.Component {
     })
       .then(this.goBack)
       .catch(function (error) {
-        Alert.alert('Gagal', error);
+        Alert.alert('Gagal', error.message);
       });
 
     this.setState({ loading: false });

@@ -152,7 +152,9 @@ export default class ProfileScreen extends Component {
 
   renderDefault = () => {
       return (
-        <Button rounded green onPress={this._signIn}><Text> Sign In </Text></Button>
+        <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', marginTop: 60 }}>
+          <Button rounded green onPress={this._signIn}><Text> Sign In </Text></Button>
+        </View>
       )
   }
 
