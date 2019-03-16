@@ -104,8 +104,14 @@ export default class ProfileScreen extends Component {
     this.state = {
       isLoading: true,
       getUser: {},
+      getPelanggan: {},
+      getBarang: {},
       key: '',
+      penjualan: []
     };
+
+    this.unsubscribe = null;
+    this.dataNya = firebase.firestore().collection("penjualan");
   }
 
   _signIn = async () =>  {
@@ -145,8 +151,26 @@ export default class ProfileScreen extends Component {
     });
   };
 
+  onCollectionUpdate = querySnapshot => {
+    const penjualan = [];
+    querySnapshot.forEach(doc => {
+      const { total, pembeli, barang } = doc.data();
+
+      penjualan.push({
+        idPenjualan: doc.id,
+        pembeli,
+        barang,
+        total
+      });
+    });
+    this.setState({
+      penjualan
+    });
+  };
+
   componentDidMount() {
     this._showData();
+    this.unsubscribe = this.dataNya.onSnapshot(this.onCollectionUpdate);
   }
 
   renderDefault = () => {
@@ -197,10 +221,12 @@ export default class ProfileScreen extends Component {
             <Button rounded danger onPress={this._signOutAsync}><Text> Sign Out </Text></Button>
           </View>
         </View>
+
+        {this.state.penjualan.map((item, i) => ( <View><Text>{item.total}</Text></View>))}
       </View>
     )
   }
-
+  
   render() {
     const isLoggedIn = this.state.key;
 
