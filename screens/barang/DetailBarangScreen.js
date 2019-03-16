@@ -21,6 +21,7 @@ import {
 } from 'react-native-easy-grid';
 import Swiper from 'react-native-swiper';
 import { ExpoConfigView } from '@expo/samples';
+import firebase from "../../Firebase";
 
 const deviceWidth = Dimensions.get('window').width;
 const deviceHeight = Dimensions.get('window').height;
@@ -95,6 +96,8 @@ export default class DetailBarangScreen extends React.Component {
     this.state = {
       idDocument: '',
       token: '',
+      getBarang: {},
+      key: '',
     };
   }
 
@@ -102,9 +105,18 @@ export default class DetailBarangScreen extends React.Component {
     const { params } = this.props.navigation.state;
     const boardKey = params ? params.boardKey: null;
 
-    this.setState({
-      idDocument: `${JSON.parse(boardKey)}`,
-    });
+     const ref = firebase.firestore().collection('boards').doc(`${JSON.parse(boardKey)}`);
+     ref.get().then((doc) => {
+       if (doc.exists) {
+         this.setState({
+           getBarang: doc.data(),
+           key: doc.id,
+           isLoading: false,
+         });
+       } else {
+         console.log("No such document!");
+       }
+     });
 
     AsyncStorage.getItem('userToken', (error, result) => {
         if (result) {
@@ -115,19 +127,24 @@ export default class DetailBarangScreen extends React.Component {
     });
   }
 
-  _doSignIn = () => {
-      return (
-        <Button warning onPress={() => this.props.navigation.navigate('SignIn')}>
-            <Text>Login Terlebih Dahulu</Text>
-        </Button>
-      )
-  }
-  _doPayment = () => {
-      return (
-        <Button success onPress={() => this.props.navigation.goBack()}>
-            <Text>Beli Barang {this.state.idDocument}</Text>
-        </Button>
-      )
+  _doPayment() {
+    if(this.state.token=='') {
+      Alert.alert(
+        'Gagal',
+        'Silakan Login Terlebih Dahulu',
+        [
+          {text: 'Cancel', onPress: () => console.log('Cancel Pressed!')},
+          {text: 'OK', onPress: () => this.props.navigation.navigate("SignIn")},
+        ],
+        { cancelable: false }
+      );
+    }
+    else {
+      this.props.navigation.navigate("PesanBarang", {
+        key: this.props.navigation.state.key,
+        boardKey: this.state.key
+      })
+    }
   }
 
   render() {

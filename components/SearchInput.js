@@ -9,6 +9,7 @@ export default class SearchInput extends React.Component {
                 editable={this.props.editable}
                 value={this.props.value}
                 onChange={this.props.onChange}
+                onKeyPress={ this.props.onKeyPress }
                 selectTextOnFocus={this.props.selectTextOnFocus}
                 onSubmitEditing={this.props.onSubmitEditing}
                 inputContainerStyle={{ borderRadius: 12, borderColor: '#fff', borderWidth: 1, backgroundColor: 'rgba(200,200,200,.3)' }}

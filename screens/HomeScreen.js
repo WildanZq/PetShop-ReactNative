@@ -86,11 +86,12 @@ export default class HomeScreen extends React.Component {
       this.setState({
         kataKunci: value,
       });
-      if (value) {
-        this.ref = firebase.firestore().collection('boards').orderBy('title').startAt(value).endAt(value+'\uf8ff');
+
+      if (value.length > 0) {
+        this.ref = firebase.firestore().collection('boards').orderBy('title').startAt(value.toLowerCase()).endAt(value.toLowerCase() + '\uf8ff');
         this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
       }
-      else{
+      else {
         this.ref = firebase.firestore().collection("boards");
         this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
       }
@@ -99,12 +100,13 @@ export default class HomeScreen extends React.Component {
   onCollectionUpdate = querySnapshot => {
     const boards = [];
     querySnapshot.forEach(doc => {
-      const { title, kategori } = doc.data();
+      const { title, kategori, harga } = doc.data();
       boards.push({
         key: doc.id,
         doc, // DocumentSnapshot
         title,
-        kategori
+        kategori,
+        harga
       });
     });
     this.setState({
@@ -115,8 +117,9 @@ export default class HomeScreen extends React.Component {
 
   componentDidMount() {
     this.props.navigation.setParams({
-            handleThis: this.onChangeSearch
-        });
+        handleThis: this.onChangeSearch,
+        handleKeyPress: this.handleKeyPress,
+    });
     this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
   }
 
@@ -224,16 +227,12 @@ export default class HomeScreen extends React.Component {
           />
         }
         showsVerticalScrollIndicator={false}>
-          {this.renderHeadLayout()}
-
-          <View>
-        <Text>TEST: {this.state.kataKunci}</Text>
-      </View>
-
+          {this.state.kataKunci? null: this.renderHeadLayout()}
           <View style={{ paddingLeft: 10 }}>
-            <Text style={{ color: Colors.primaryText, fontSize: 18, marginTop: 20 }}>Rekomendasi untuk Anda</Text>
+            <Text style={{ color: Colors.primaryText, fontSize: 18, marginTop: 20 }}>
+              {this.state.kataKunci? `Hasil Pencarian: "`+this.state.kataKunci+`"`: `Rekomendasi untuk Anda`}
+            </Text>
           </View>
-
           {this.renderProductList()}
       </ScrollView>
     );
