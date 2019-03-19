@@ -88,7 +88,7 @@ export default class HomeScreen extends React.Component {
       });
 
       if (value.length > 0) {
-        this.ref = firebase.firestore().collection('boards').orderBy('title').startAt(value.toLowerCase()).endAt(value.toLowerCase() + '\uf8ff');
+        this.ref = firebase.firestore().collection('boards').orderBy('title').startAt(value).endAt(value + '\uf8ff');
         this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
       }
       else {
@@ -133,16 +133,13 @@ export default class HomeScreen extends React.Component {
         <View style={{height:160}}>
           <Swiper showsButtons={true} autoplay={true}>
             <View style={styleSlider.slide1}>
-            <Image
-              style={{width: 400, height: 300}}
-              source={{uri: 'https://www.barnesandnoble.com/blog/sci-fi-fantasy/wp-content/uploads/sites/4/2017/07/onepiece2.jpg'}}
-            />
+            <Text style={styleSlider.text}>PROMOSI ke-1</Text>
             </View>
             <View style={styleSlider.slide2}>
-              <Text style={styleSlider.text}>Beautiful</Text>
+              <Text style={styleSlider.text}>PROMOSI ke-2</Text>
             </View>
             <View style={styleSlider.slide3}>
-              <Text style={styleSlider.text}>And simple</Text>
+              <Text style={styleSlider.text}>PROMOSI ke-3</Text>
             </View>
           </Swiper>
         </View>

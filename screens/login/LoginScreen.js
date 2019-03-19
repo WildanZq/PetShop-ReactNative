@@ -163,6 +163,7 @@ export default class LoginScreen extends React.Component {
                 onChange={event => this.setState({ email: event.nativeEvent.text })}
                 keyboardType='email-address'
                 label='Email'
+                autoComplete='email'
                 placeholder="john@example.com"
                 inputContainerStyle={ [styles.inputContainer] }
                 containerStyle={{marginTop: 10}}

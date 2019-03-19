@@ -1,16 +1,14 @@
 import React, { Component } from 'react'
 import {
-  Animated,
   Image,
-  Platform,
-  ScrollView,
   StyleSheet,
   AsyncStorage,
-  ActivityIndicator
+  ActivityIndicator,
+  FlatList
 } from 'react-native'
 import { View, Button, Text } from 'native-base'
-import { Icon } from 'react-native-elements'
 import firebase from "../Firebase";
+import Colors from '../constants/Colors';
 
 const styles = StyleSheet.create({
   cardContainer: {
@@ -95,7 +93,7 @@ export default class ProfileScreen extends Component {
   static navigationOptions = {
     headerTitle: 'Account',
     headerStyle: {
-      backgroundColor: '#29B6F6',
+      backgroundColor: Colors.primary
     },
     headerTintColor: '#fff',
   }
@@ -104,17 +102,14 @@ export default class ProfileScreen extends Component {
     this.state = {
       isLoading: true,
       getUser: {},
-      getPelanggan: {},
-      getBarang: {},
       key: '',
       penjualan: []
     };
 
     this.unsubscribe = null;
-    this.dataNya = firebase.firestore().collection("penjualan");
   }
 
-  _signIn = async () =>  {
+  _signIn = () =>  {
     this.props.navigation.navigate('SignIn');
   };
 
@@ -135,7 +130,7 @@ export default class ProfileScreen extends Component {
             if (doc.exists) {
               this.setState({
                 getUser: doc.data(),
-                key: doc.id,
+                key: result,
                 isLoading: false,
               });
             } else {
@@ -151,44 +146,70 @@ export default class ProfileScreen extends Component {
     });
   };
 
+  addProduct = () => {
+    this.props.navigation.navigate('AddProduct');
+  }
+
   onCollectionUpdate = querySnapshot => {
     const penjualan = [];
-    querySnapshot.forEach(doc => {
-      const { total, pembeli, barang } = doc.data();
 
-      penjualan.push({
-        idPenjualan: doc.id,
-        pembeli,
-        barang,
-        total
-      });
-    });
-    this.setState({
-      penjualan
+    querySnapshot.forEach(doc => {
+      let newItem = doc.data();
+      newItem.id = doc.id;
+
+      if (newItem.barang) {
+        newItem.barang.get()
+          .then(res => {
+            newItem.barangData = res.data()
+            penjualan.push(newItem);
+            this.setState({
+              penjualan: penjualan
+            })
+            console.log(newItem.barangData.harga)
+          })
+          .catch(err => console.error(err));
+      } else {
+        penjualan.push(newItem);
+      }
     });
   };
 
   componentDidMount() {
     this._showData();
+    
+    this.dataNya = firebase.firestore().collection('penjualan');
     this.unsubscribe = this.dataNya.onSnapshot(this.onCollectionUpdate);
   }
 
   renderDefault = () => {
       return (
-        <Button rounded green onPress={this._signIn}><Text> Sign In </Text></Button>
+        <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', marginTop: 60 }}>
+          <Button rounded green onPress={this._signIn}><Text> Sign In </Text></Button>
+        </View>
       )
+  }
+
+  renderImg() {
+    if (this.state.getUser.foto) {
+      return (<Image
+        style={styles.userImage}
+        source={{
+          uri: this.state.getUser.foto
+        }}
+      />);
+    } else {
+      return (<Image
+        style={styles.userImage}
+        source={ require('../assets/images/blank_profile.jpg') }
+      />);
+    }
   }
 
   renderContactHeader = () => {
     return (
       <View style={styles.headerContainer}>
         <View style={styles.userRow}>
-          <Image
-            style={styles.userImage}
-            source={{
-              uri: this.state.getUser.foto,
-            }}
-          />
+          {this.renderImg()}
           <View style={styles.userNameRow}>
             <Text style={styles.userNameText}>{this.state.getUser.nama}</Text>
           </View>
@@ -200,29 +221,20 @@ export default class ProfileScreen extends Component {
         </View>
         <View style={styles.socialRow}>
           <View>
-            <Icon
-              size={30}
-              type="entypo"
-              color="#3B5A98"
-              name="facebook-with-circle"
-              onPress={() => console.log('facebook')}
-            />
-          </View>
-          <View style={styles.socialIcon}>
-            <Icon
-              size={30}
-              type="entypo"
-              color="#56ACEE"
-              name="twitter-with-circle"
-              onPress={() => console.log('twitter')}
-            />
+            <Button style={{ backgroundColor: Colors.accent, marginRight: 10 }} white rounded onPress={this.addProduct}><Text style={{ color: '#000' }}> Tambah Barang </Text></Button>
           </View>
           <View>
             <Button rounded danger onPress={this._signOutAsync}><Text> Sign Out </Text></Button>
           </View>
         </View>
 
-        {this.state.penjualan.map((item, i) => ( <View><Text>{item.total}</Text></View>))}
+        <FlatList
+            data={this.state.penjualan}
+            keyExtractor={(item, index) => item.id}
+            renderItem={({ item }) => (
+              <Text>{ item.barangData.title }</Text>
+            )}
+        />
       </View>
     )
   }
@@ -232,8 +244,8 @@ export default class ProfileScreen extends Component {
 
     if (this.state.isLoading) {
       return (
-        <View style={styles.activity}>
-          <ActivityIndicator size="large" color="#0000ff" />
+        <View style={{ marginTop: 60 }}>
+          <ActivityIndicator size="large" color={Colors.primary} />
         </View>
       );
     }

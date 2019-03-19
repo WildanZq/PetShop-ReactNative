@@ -23,6 +23,7 @@ import Swiper from 'react-native-swiper';
 import { ExpoConfigView } from '@expo/samples';
 import firebase from "../../Firebase";
 import NumberFormat from 'react-number-format';
+import Colors from '../../constants/Colors';
 
 const deviceWidth = Dimensions.get('window').width;
 const deviceHeight = Dimensions.get('window').height;
@@ -90,6 +91,10 @@ const styles = StyleSheet.create({
 export default class DetailBarangScreen extends React.Component {
   static navigationOptions = {
     title: 'Detail Barang',
+    headerStyle: {
+      backgroundColor: Colors.primary,
+    },
+    headerTintColor: '#fff',
   };
 
   constructor() {
