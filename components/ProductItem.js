@@ -27,7 +27,7 @@ const ProductItem = ({ navigation, data }) => {
         <Card style={{ flex: 0, backgroundColor: '#ddd', height: "auto", elevation: 1.8,}}>
             <CardItem cardBody>
               <Image
-                source={{ uri: 'https://img.purch.com/w/660/aHR0cDovL3d3dy5saXZlc2NpZW5jZS5jb20vaW1hZ2VzL2kvMDAwLzA4OC85MTEvb3JpZ2luYWwvZ29sZGVuLXJldHJpZXZlci1wdXBweS5qcGVn'}}
+                source={data.image? {uri: data.image} : require('../assets/images/no_img.jpeg')}
                 style={{height: 140, width: null, flex: 1}}/>
             </CardItem>
             <CardItem style={{ flexDirection: 'column', alignItems: 'flex-start' }}>

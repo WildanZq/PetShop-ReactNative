@@ -122,10 +122,43 @@ export default class ProfileScreen extends Component {
     });
   };
 
+  onCollectionUpdate = querySnapshot => {
+    const penjualan = [];
+
+    querySnapshot.forEach(doc => {
+      let newItem = doc.data();
+      newItem.id = doc.id;
+
+      if (newItem.barang != null) {
+        newItem.barang.get()
+          .then(res => {
+            newItem.barangData = res.data()
+
+            if (newItem.barangData != null) {
+              penjualan.push(newItem);
+              this.setState({
+                penjualan: penjualan
+              })
+              console.log(newItem.barangData.title)
+            }
+          })
+          .catch(err => console.error(err));
+      } else {
+        penjualan.push(newItem);
+      }
+    });
+  };
+
   _showData = async () =>  {
     await AsyncStorage.getItem('userToken', (error, result) => {
         if (result) {
+          const userRef = firebase.firestore().collection('user').doc(result);
+
+          this.dataNya = firebase.firestore().collection('penjualan').where('pembeli', '==', userRef);
+          this.unsubscribe = this.dataNya.onSnapshot(this.onCollectionUpdate);
+
           const ref = firebase.firestore().collection('user').doc(result);
+
           ref.get().then((doc) => {
             if (doc.exists) {
               this.setState({
@@ -146,39 +179,12 @@ export default class ProfileScreen extends Component {
     });
   };
 
-  addProduct = () => {
-    this.props.navigation.navigate('AddProduct');
-  }
-
-  onCollectionUpdate = querySnapshot => {
-    const penjualan = [];
-
-    querySnapshot.forEach(doc => {
-      let newItem = doc.data();
-      newItem.id = doc.id;
-
-      if (newItem.barang) {
-        newItem.barang.get()
-          .then(res => {
-            newItem.barangData = res.data()
-            penjualan.push(newItem);
-            this.setState({
-              penjualan: penjualan
-            })
-            console.log(newItem.barangData.harga)
-          })
-          .catch(err => console.error(err));
-      } else {
-        penjualan.push(newItem);
-      }
-    });
-  };
-
   componentDidMount() {
     this._showData();
-    
-    this.dataNya = firebase.firestore().collection('penjualan');
-    this.unsubscribe = this.dataNya.onSnapshot(this.onCollectionUpdate);
+  }
+
+  addProduct = () => {
+    this.props.navigation.navigate('AddProduct');
   }
 
   renderDefault = () => {

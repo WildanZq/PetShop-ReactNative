@@ -19,6 +19,7 @@ import {
   Row,
   Col
 } from 'react-native-easy-grid';
+import ImageView from 'react-native-image-view';
 import Swiper from 'react-native-swiper';
 import { ExpoConfigView } from '@expo/samples';
 import firebase from "../../Firebase";
@@ -157,26 +158,12 @@ export default class DetailBarangScreen extends React.Component {
     return (
       <ScrollView style={styles.scrollview}>
           <View style={styles.imageSwiperContainer}>
-            <Swiper showsButtons={false} autoplay={false}>
               <View style={styles.swiperSlide}>
                 <Image
                   style={styles.slideImage}
-                  source={{uri: 'https://www.barnesandnoble.com/blog/sci-fi-fantasy/wp-content/uploads/sites/4/2017/07/onepiece2.jpg'}}
+                  source={this.state.getBarang.image? {uri: this.state.getBarang.image} : require('../../assets/images/no_img.jpeg')}
                 />
               </View>
-              <View style={styles.swiperSlide}>
-                <Image
-                  style={styles.slideImage}
-                  source={{uri: 'https://www.barnesandnoble.com/blog/sci-fi-fantasy/wp-content/uploads/sites/4/2017/07/onepiece2.jpg'}}
-                />
-              </View>
-              <View style={styles.swiperSlide}>
-                <Image
-                  style={styles.slideImage}
-                  source={{uri: 'https://www.barnesandnoble.com/blog/sci-fi-fantasy/wp-content/uploads/sites/4/2017/07/onepiece2.jpg'}}
-                />
-              </View>
-            </Swiper>
           </View>
           <View style={styles.main}>
             <Text style={[styles.textDefault, styles.stokIndicator]}>

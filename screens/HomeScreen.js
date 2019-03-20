@@ -55,11 +55,11 @@ export default class HomeScreen extends React.Component {
            <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 10 }}>
              <View style={{ flex: .125, alignItems: 'center' }}>
                <Image
-                 style={{ width: 35, height: 35 }}
+                 style={{ width: 40, height: 40 }}
                  source={require('../assets/images/icon-transparent.png')}
                />
              </View>
-             <View style={{ flex: .75 }} >
+             <View style={{ flex: .95 }} >
                <TouchableOpacity activeOpacity={1} onPress={() => console.log('search clicked')} >
                <SearchInput
                value={params.kataKunci}
@@ -72,7 +72,7 @@ export default class HomeScreen extends React.Component {
              <View style={{ flex: .125, alignItems: 'center' }}>
                <TouchableOpacity onPress={() => console.log('cart clicked')} >
                  <Icon
-                   name='md-cart'
+                   name='md-heart'
                    size={50}
                    style={{ color: '#fff' }}
                  />
@@ -100,11 +100,12 @@ export default class HomeScreen extends React.Component {
   onCollectionUpdate = querySnapshot => {
     const boards = [];
     querySnapshot.forEach(doc => {
-      const { title, kategori, harga } = doc.data();
+      const { title, image, kategori, harga } = doc.data();
       boards.push({
         key: doc.id,
         doc, // DocumentSnapshot
         title,
+        image,
         kategori,
         harga
       });
@@ -129,7 +130,7 @@ export default class HomeScreen extends React.Component {
 
   renderHeadLayout() {
     return (
-      <View>
+      <View style={{ backgroundColor: '#f5f5f5' }}>
         <View style={{height:160}}>
           <Swiper showsButtons={true} autoplay={true}>
             <View style={styleSlider.slide1}>
@@ -144,7 +145,6 @@ export default class HomeScreen extends React.Component {
           </Swiper>
         </View>
 
-
         <Card
           style={{
             flexDirection: "row",
@@ -152,9 +152,10 @@ export default class HomeScreen extends React.Component {
             justifyContent: "center",
             alignItems: "center",
             height: "auto",
-            elevation: 1.5,
+            elevation: 0,
             marginTop: 0,
             marginRight: 0,
+            marginBottom: 15,
             marginLeft: 0,
             flexWrap: 'wrap',
             paddingVertical: 16,
@@ -226,7 +227,7 @@ export default class HomeScreen extends React.Component {
         showsVerticalScrollIndicator={false}>
           {this.state.kataKunci? null: this.renderHeadLayout()}
           <View style={{ paddingLeft: 10 }}>
-            <Text style={{ color: Colors.primaryText, fontSize: 18, marginTop: 20 }}>
+            <Text style={{ color: Colors.primaryText, fontSize: 15, marginTop: 20 }}>
               {this.state.kataKunci? `Hasil Pencarian: "`+this.state.kataKunci+`"`: `Rekomendasi untuk Anda`}
             </Text>
           </View>
