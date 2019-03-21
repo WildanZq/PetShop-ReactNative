@@ -1,7 +1,5 @@
 import React from 'react';
-import {
-    AsyncStorage, Alert
-} from "react-native";
+import { AsyncStorage, Alert } from "react-native";
 import {
     View,
     Text,
@@ -18,9 +16,6 @@ import {
     Item,
     Input,
 } from "native-base";
-import {
-    ExpoConfigView
-} from '@expo/samples';
 import firebase from "../../Firebase";
 import Colors from '../../constants/Colors';
 import NumberFormat from 'react-number-format';

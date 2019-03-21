@@ -10,6 +10,7 @@ import {
   Button,
   Text,
 } from "native-base";
+import {TouchableOpacity} from 'react-native';
 import {
   Input,
   Divider,
@@ -90,13 +91,17 @@ const styles = StyleSheet.create({
 });
 
 export default class DetailBarangScreen extends React.Component {
-  static navigationOptions = {
-    title: 'Detail Barang',
-    headerStyle: {
-      backgroundColor: Colors.primary,
-    },
-    headerTintColor: '#fff',
-  };
+  static navigationOptions = ({ navigation }) => {
+    const {params = {}} = navigation.state;
+
+    return {
+      title: params.title,
+      headerStyle: {
+        backgroundColor: Colors.primary,
+      },
+      headerTintColor: '#fff',
+    }
+  }
 
   constructor() {
     super();
@@ -104,6 +109,8 @@ export default class DetailBarangScreen extends React.Component {
       idDocument: '',
       token: '',
       getBarang: {},
+      imageIndex: 0,
+      isImageViewVisible: false,
       key: '',
     };
   }
@@ -155,15 +162,50 @@ export default class DetailBarangScreen extends React.Component {
   }
 
   render() {
+    const images = [
+        {
+            source: {
+                uri: this.state.getBarang.image,
+            },
+            title: 'IMG 1',
+            width: 806,
+            height: 720,
+        },
+    ];
+    const noImages = [
+        {
+            source: require('../../assets/images/no_img.jpeg'),
+            title: 'No Image',
+            width: 806,
+            height: 720,
+        },
+    ];
+    const {isImageViewVisible, imageIndex} = this.state;
+
     return (
       <ScrollView style={styles.scrollview}>
           <View style={styles.imageSwiperContainer}>
               <View style={styles.swiperSlide}>
+              <TouchableOpacity
+              onPress={() => {
+                  this.setState({
+                      imageIndex: 0,
+                      isImageViewVisible: true,
+                  });
+              }}>
                 <Image
                   style={styles.slideImage}
                   source={this.state.getBarang.image? {uri: this.state.getBarang.image} : require('../../assets/images/no_img.jpeg')}
                 />
+              </TouchableOpacity>
               </View>
+              <ImageView
+                    images={this.state.getBarang.image? images : noImages}
+                    imageIndex={imageIndex}
+                    animationType="fade"
+                    isVisible={isImageViewVisible}
+                    onClose={() => this.setState({isImageViewVisible: false})}
+                />
           </View>
           <View style={styles.main}>
             <Text style={[styles.textDefault, styles.stokIndicator]}>
@@ -214,15 +256,6 @@ export default class DetailBarangScreen extends React.Component {
             </Grid>
           </View>
       </ScrollView>
-        // {<View>
-        //   <Text>{this.state.idDocument}{"\n\n\n"} </Text>
-        //
-        //   {this.state.token ? (
-        //     this._doPayment()
-        //     ): (
-        //     this._doSignIn()
-        //   )}
-        // </View>}
     );
   }
 }

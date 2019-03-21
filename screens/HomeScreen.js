@@ -163,37 +163,79 @@ export default class HomeScreen extends React.Component {
           }}
         >
           <View>
-            <TouchableOpacity style={styles.menuIcon}>
+            <TouchableOpacity style={styles.menuIcon}
+            onPress={() =>
+              this.props.navigation.navigate("KategoriBarang",
+              {
+                key: this.props.navigation.state.key,
+                refKategori: 'adopsi'
+              }
+            )}>
               <Icon type="MaterialIcons" name="pets" size={18} style={{ color: '#ffc956' }} />
             </TouchableOpacity>
             <Text style={styles.menuLabel}>Adopsi</Text>
           </View>
           <View>
-            <TouchableOpacity style={styles.menuIcon}>
+            <TouchableOpacity style={styles.menuIcon}
+            onPress={() =>
+              this.props.navigation.navigate("KategoriBarang",
+              {
+                key: this.props.navigation.state.key,
+                refKategori: 'makanan'
+              }
+            )}>
               <Icon type="MaterialCommunityIcons" name="food" size={18} style={{ color: "#3ebc42" }} />
             </TouchableOpacity>
             <Text style={styles.menuLabel}>Makanan</Text>
           </View>
           <View>
-            <TouchableOpacity style={styles.menuIcon}>
+            <TouchableOpacity style={styles.menuIcon}
+            onPress={() =>
+              this.props.navigation.navigate("KategoriBarang",
+              {
+                key: this.props.navigation.state.key,
+                refKategori: 'aksesoris'
+              }
+            )}>
               <Icon type="MaterialCommunityIcons" name="tshirt-crew" size={18} style={{ color: '#d2e524' }} />
             </TouchableOpacity>
             <Text style={styles.menuLabel}>Aksesoris</Text>
           </View>
           <View>
-            <TouchableOpacity style={styles.menuIcon}>
+            <TouchableOpacity style={styles.menuIcon}
+            onPress={() =>
+              this.props.navigation.navigate("KategoriBarang",
+              {
+                key: this.props.navigation.state.key,
+                refKategori: 'mainan'
+              }
+            )}>
               <Icon type="Ionicons" name="ios-baseball" size={18} style={{ color: '#942bb5' }} />
             </TouchableOpacity>
             <Text style={styles.menuLabel}>Mainan</Text>
           </View>
           <View>
-            <TouchableOpacity style={styles.menuIcon}>
+            <TouchableOpacity style={styles.menuIcon}
+            onPress={() =>
+              this.props.navigation.navigate("KategoriBarang",
+              {
+                key: this.props.navigation.state.key,
+                refKategori: 'kesehatan'
+              }
+            )}>
               <Icon type="FontAwesome" name="stethoscope" size={18} style={{ color: '#359fa3' }} />
             </TouchableOpacity>
             <Text style={styles.menuLabel}>Kesehatan</Text>
           </View>
           <View>
-            <TouchableOpacity style={styles.menuIcon}>
+            <TouchableOpacity style={styles.menuIcon}
+            onPress={() =>
+              this.props.navigation.navigate("KategoriBarang",
+              {
+                key: this.props.navigation.state.key,
+                refKategori: 'suplemen'
+              }
+            )}>
               <Icon type="MaterialCommunityIcons" name="pill" size={18} style={{ color: '#c62121' }} />
             </TouchableOpacity>
             <Text style={styles.menuLabel}>Suplemen</Text>

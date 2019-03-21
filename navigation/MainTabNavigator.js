@@ -4,8 +4,8 @@ import { createStackNavigator, createBottomTabNavigator } from 'react-navigation
 
 import TabBarIcon from '../components/TabBarIcon';
 import HomeScreen from '../screens/HomeScreen';
-import LinksScreen from '../screens/LinksScreen';
-import SettingsScreen from '../screens/SettingsScreen';
+import CartScreen from '../screens/CartScreen';
+import TransaksiScreen from '../screens/TransaksiScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 
 const HomeStack = createStackNavigator({
@@ -26,30 +26,30 @@ HomeStack.navigationOptions = {
   ),
 };
 
-const LinksStack = createStackNavigator({
-  Links: LinksScreen,
+const CartStack = createStackNavigator({
+  Cart: CartScreen,
 });
 
-LinksStack.navigationOptions = {
-  tabBarLabel: 'Links',
+CartStack.navigationOptions = {
+  tabBarLabel: 'Cart',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
-      name={Platform.OS === 'ios' ? 'ios-link' : 'md-link'}
+      name={Platform.OS === 'ios' ? 'ios-cart' : 'md-cart'}
     />
   ),
 };
 
-const SettingsStack = createStackNavigator({
-  Settings: SettingsScreen,
+const TransaksiStack = createStackNavigator({
+  Transaksi: TransaksiScreen,
 });
 
-SettingsStack.navigationOptions = {
-  tabBarLabel: 'Settings',
+TransaksiStack.navigationOptions = {
+  tabBarLabel: 'Transaksi',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
-      name={Platform.OS === 'ios' ? 'ios-options' : 'md-options'}
+      name={Platform.OS === 'ios' ? 'ios-card' : 'md-card'}
     />
   ),
 };
@@ -70,7 +70,7 @@ ProfileStack.navigationOptions = {
 
 export default createBottomTabNavigator({
   HomeStack,
-  LinksStack,
-  SettingsStack,
+  CartStack,
+  TransaksiStack,
   ProfileStack,
 });

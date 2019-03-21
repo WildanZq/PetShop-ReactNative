@@ -21,7 +21,8 @@ const ProductItem = ({ navigation, data }) => {
         navigation.navigate("DetailBarang",
         {
           key: navigation.state.key,
-          boardKey:`${JSON.stringify(data.key)}`
+          boardKey:`${JSON.stringify(data.key)}`,
+          title: `${data.title}`
         }
       )}>
         <Card style={{ flex: 0, backgroundColor: '#ddd', height: "auto", elevation: 1.8,}}>
