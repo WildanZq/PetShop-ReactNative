@@ -170,8 +170,21 @@ export default class DetailBarangScreen extends React.Component {
       .catch(() => Alert.alert('','Gagal ditambahkan ke keranjang'));
   };
 
-  addToWishlist = () => {
+  _doTransaksi = () => {
+    this.ref = firebase.firestore().collection('penjualan');
 
+    this.ref.add({
+        barang: firebase.firestore().doc(`/boards/MxydAYw4Ese8KjVaai7Q`),
+      })
+      .catch((error) => {
+        console.error("Error adding user: ", error);
+      });
+
+    Alert.alert('', 'Pembelian Berhasil Dilakukan!');
+    this.props.navigation.navigate("Main");
+  }
+
+  addToWishlist = () => {
   }
 
   render() {
@@ -228,7 +241,7 @@ export default class DetailBarangScreen extends React.Component {
               onClose={() => this.setState({isImageViewVisible: false})}
             />
             <Button 
-            onPress={this.addToWishlist}
+            onPress={() => {this.addToWishlist()} }
             style={{ borderRadius: 50, backgroundColor: '#fff', position: 'absolute', bottom: 10, right: 15, width: 50, height: 50, padding: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
               <Icon
                 name='md-heart'

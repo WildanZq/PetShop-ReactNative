@@ -48,20 +48,27 @@ export default class WishlistBarangScreen extends React.Component {
             let newItem = doc.data();
             newItem.id = doc.id;
             console.log(newItem.id)
-            console.log("awe" + newItem.barang[0].nama)
 
             for(let i=0; i < newItem.barang.length; i++) {
-                let { nama } = newItem.barang[i];
-                console.log(nama);
-
-                wishlist.push({
-                    key: i,
-                    nama
-                });
-
-                this.setState({
-                    wishlist: wishlist
+                newItem.barang[i].barangData.get()
+                .then(res => {
+                        const { title, image, kategori, harga } = res.data();
+                        newItem.barangData = res.data();
+                        
+                        wishlist.push({
+                            key: res.id,
+                            title,
+                            image, 
+                            kategori, 
+                            harga
+                        });
+                        this.setState({
+                            wishlist: wishlist
+                        });
+                        
+                        console.log(newItem.barangData.title)
                 })
+                .catch(err => console.error(err));
             }
         });
     };
@@ -69,12 +76,10 @@ export default class WishlistBarangScreen extends React.Component {
     _showData = async () =>  {
         await AsyncStorage.getItem('userToken', (error, result) => {
             if (result) {
-            const userRef = firebase.firestore().collection('user').doc(result);
+                const userRef = firebase.firestore().collection('user').doc(result);
 
-            this.dataNya = firebase.firestore().collection('wishlist').where('user', '==', userRef);
-            this.unsubscribe = this.dataNya.onSnapshot(this.onCollectionUpdate);
-
-            const ref = firebase.firestore().collection('user').doc(result);
+                this.dataNya = firebase.firestore().collection('wishlist').where('user', '==', userRef);
+                this.unsubscribe = this.dataNya.onSnapshot(this.onCollectionUpdate);
 
                 this.setState({
                     key: result,
@@ -93,32 +98,14 @@ export default class WishlistBarangScreen extends React.Component {
         this._showData();
     }
 
-    _doTransaksi = () => {
-        this.ref = firebase.firestore().collection('wishlist');
-        
-        this.ref.add({
-            pembeli: firebase.firestore().doc(`/user/${this.state.token}`),
-            barang: firebase.firestore().doc(`/boards/${this.state.key}`),
-            tanggal: firebase.firestore.FieldValue.serverTimestamp(),
-            total: `${this.state.getBarang.harga}`,
-        })
-        .catch((error) => {
-            console.error("Error adding user: ", error);
-        });
-
-        Alert.alert('', 'Pembelian Berhasil Dilakukan!');
-        this.props.navigation.navigate("Main");
-    }
-
     render() {
         return ( 
             <ScrollView>
                 <View>
                 <FlatList
                     data={this.state.wishlist}
-                    keyExtractor = { (item, index) => index.toString() }
                     renderItem={({ item }) => (
-                    <Text>{ item.key }</Text>
+                    <Text key={item.key}>{ item.title }</Text>
                     )}
                 />
                 </View>
