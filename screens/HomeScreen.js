@@ -13,7 +13,7 @@ import {
   View,
   Text,
   Card,
-  Icon
+  Icon,
 } from "native-base";
 import Swiper from 'react-native-swiper';
 import Colors from '../constants/Colors';
@@ -24,6 +24,7 @@ import SearchInput from '../components/SearchInput';
 export default class HomeScreen extends React.Component {
   constructor() {
     super();
+
     NetInfo.isConnected.fetch().done((isConnected) => {
         if ( isConnected ) { firebase.firestore().enableNetwork(); }
         else { firebase.firestore().disableNetwork(); }
@@ -40,6 +41,8 @@ export default class HomeScreen extends React.Component {
 
   static navigationOptions =  ({ navigation }) => {
       const {params = {}} = navigation.state;
+      const { navigate } = navigation;
+      
        return {
          headerStyle: {
            backgroundColor: Colors.primary,
@@ -48,11 +51,11 @@ export default class HomeScreen extends React.Component {
            <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 10 }}>
              <View style={{ flex: .125, alignItems: 'center' }}>
                <Image
-                 style={{ width: 40, height: 40 }}
+                 style={{ width: 35, height: 35 }}
                  source={require('../assets/images/icon-transparent.png')}
                />
              </View>
-             <View style={{ flex: .95 }} >
+             <View style={{ flex: .75 }} >
                <TouchableOpacity activeOpacity={1} onPress={() => console.log('search clicked')} >
                <SearchInput
                value={params.kataKunci}
@@ -63,7 +66,7 @@ export default class HomeScreen extends React.Component {
                </TouchableOpacity>
              </View>
              <View style={{ flex: .125, alignItems: 'center' }}>
-               <TouchableOpacity onPress={() => console.log('cart clicked')} >
+               <TouchableOpacity onPress={() => navigate('WishlistBarang')} >
                  <Icon
                    name='md-heart'
                    size={50}

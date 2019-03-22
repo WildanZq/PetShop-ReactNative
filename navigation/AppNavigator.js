@@ -8,6 +8,7 @@ import SignupScreen from '../screens/login/SignupScreen';
 import DetailBarangScreen from '../screens/barang/DetailBarangScreen';
 import PesanBarangScreen from '../screens/barang/PesanBarangScreen';
 import KategoriBarangScreen from '../screens/barang/KategoriBarangScreen';
+import WishlistBarangScreen from '../screens/barang/WishlistBarangScreen';
 import AddProductScreen from '../screens/AddProductScreen';
 
 const doNotShowHeaderOption = {
@@ -27,7 +28,9 @@ const AppStack = createStackNavigator(
     DetailBarang: DetailBarangScreen,
     PesanBarang: PesanBarangScreen,
     AddProduct: AddProductScreen,
-    KategoriBarang: KategoriBarangScreen
+    KategoriBarang: KategoriBarangScreen,
+    WishlistBarang: WishlistBarangScreen
+
   }
 );
 

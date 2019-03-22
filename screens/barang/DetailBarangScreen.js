@@ -2,33 +2,17 @@ import React from 'react';
 import {AsyncStorage, Alert, Image, StyleSheet, Dimensions, ScrollView} from "react-native";
 import {
   View,
-  Card,
-  CardItem,
-  Icon,
-  Item,
-  Container,
   Button,
   Text,
+  Icon
 } from "native-base";
-import {TouchableOpacity} from 'react-native';
-import {
-  Input,
-  Divider,
-} from 'react-native-elements';
-import {
-  Grid,
-  Row,
-  Col
-} from 'react-native-easy-grid';
+import { TouchableOpacity, ActivityIndicator } from 'react-native';
 import ImageView from 'react-native-image-view';
-import Swiper from 'react-native-swiper';
-import { ExpoConfigView } from '@expo/samples';
 import firebase from "../../Firebase";
 import NumberFormat from 'react-number-format';
 import Colors from '../../constants/Colors';
 
 const deviceWidth = Dimensions.get('window').width;
-const deviceHeight = Dimensions.get('window').height;
 
 const styles = StyleSheet.create({
   scrollview: {
@@ -61,7 +45,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#eee",
     width: deviceWidth,
     height: 10,
-    marginVertical: 15,
+    marginTop: 15,
   },
   textDefault: {
     fontFamily: "Roboto",
@@ -112,6 +96,7 @@ export default class DetailBarangScreen extends React.Component {
       imageIndex: 0,
       isImageViewVisible: false,
       key: '',
+      isLoading: true
     };
   }
 
@@ -141,7 +126,7 @@ export default class DetailBarangScreen extends React.Component {
     });
   }
 
-  _doPayment() {
+  _doPayment = () => {
     if (this.state.token == '') {
       Alert.alert(
         'Gagal',
@@ -159,6 +144,34 @@ export default class DetailBarangScreen extends React.Component {
         boardKey: this.state.key
       })
     }
+  }
+
+  addToCart = async () => {
+    let cart = JSON.parse(await AsyncStorage.getItem('cart'));
+    if (! cart) {
+      cart = [];
+    }
+
+    let founded = false;
+    cart.map(val => {
+      if (val.id == this.state.key) {
+        founded = true;
+        val.jumlah = val.jumlah++;
+      }
+    });
+
+    if (! founded) {
+      const newItem = {id: this.state.key, jumlah: 1};
+      cart.push(newItem);
+    }
+
+    await AsyncStorage.setItem('cart', JSON.stringify(cart))
+      .then(() => Alert.alert('','Berhasil ditambahkan ke keranjang'))
+      .catch(() => Alert.alert('','Gagal ditambahkan ke keranjang'));
+  };
+
+  addToWishlist = () => {
+
   }
 
   render() {
@@ -182,15 +195,23 @@ export default class DetailBarangScreen extends React.Component {
     ];
     const {isImageViewVisible, imageIndex} = this.state;
 
+    if (this.state.isLoading)
+      return (
+        <View style={{ marginTop: 60 }}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+        </View>
+      );
+
     return (
-      <ScrollView style={styles.scrollview}>
+      <View style={{ display: 'flex', flex: 1 }}>
+        <ScrollView style={styles.scrollview}>
           <View style={styles.imageSwiperContainer}>
-              <View style={styles.swiperSlide}>
+            <View style={styles.swiperSlide}>
               <TouchableOpacity
-              onPress={() => {
+                onPress={() => {
                   this.setState({
-                      imageIndex: 0,
-                      isImageViewVisible: true,
+                    imageIndex: 0,
+                    isImageViewVisible: true,
                   });
               }}>
                 <Image
@@ -198,64 +219,70 @@ export default class DetailBarangScreen extends React.Component {
                   source={this.state.getBarang.image? {uri: this.state.getBarang.image} : require('../../assets/images/no_img.jpeg')}
                 />
               </TouchableOpacity>
-              </View>
-              <ImageView
-                    images={this.state.getBarang.image? images : noImages}
-                    imageIndex={imageIndex}
-                    animationType="fade"
-                    isVisible={isImageViewVisible}
-                    onClose={() => this.setState({isImageViewVisible: false})}
-                />
+            </View>
+            <ImageView
+              images={this.state.getBarang.image? images : noImages}
+              imageIndex={imageIndex}
+              animationType="fade"
+              isVisible={isImageViewVisible}
+              onClose={() => this.setState({isImageViewVisible: false})}
+            />
+            <Button 
+            onPress={this.addToWishlist}
+            style={{ borderRadius: 50, backgroundColor: '#fff', position: 'absolute', bottom: 10, right: 15, width: 50, height: 50, padding: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
+              <Icon
+                name='md-heart'
+                size={56}
+                style={{ color: Colors.divider, marginLeft: 0, marginRight: 0 }}
+              />
+            </Button>
           </View>
           <View style={styles.main}>
             <Text style={[styles.textDefault, styles.stokIndicator]}>
-              Stok tersedia!{"\n"}
-              Kategori: {this.state.getBarang.kategori}
+              Stok tersedia!
             </Text>
             <Text style={[styles.textDefault, styles.itemName, styles.bold]}>
               {this.state.getBarang.title}
             </Text>
-            <NumberFormat value={this.state.getBarang.harga} displayType={'text'} thousandSeparator={'.'} decimalSeparator={','} prefix={'Rp'}
-            renderText={value =>
-            <Text style={[styles.textDefault, styles.itemPrice, styles.semiBold]}>{value}{"\n\n"}</Text>} />
+            <NumberFormat value={this.state.getBarang.harga} displayType={'text'} thousandSeparator={'.'} decimalSeparator={','} prefix={'Rp '}
+              renderText={value =>
+              <Text style={[styles.itemPrice]}>{value}</Text>}
+            />
           </View>
           <View style={styles.divider}/>
           <View style={styles.main}>
             <Text style={[styles.textDefault, styles.semiBold]}>
-              Informasi Produk
+              Kategori
             </Text>
             <Text>
-              Pemesanan Minimum : 1 pcs
-              Kondisi : Baru
-              Berat : 100 gram
+              {this.state.getBarang.kategori}
             </Text>
             <Text style={[styles.textDefault, styles.semiBold]}>
-              Deskripsi Produk
+              Deskripsi
             </Text>
-            <Text>
-              Makanan kucing Whiskas Tuna Premium ukuran 250 gram 100% original jaminan seller. lorem ipsum dolor sit amet lorem ipsum dolor sit amet lorem ipsum dolor sit amet lorem ipsum dolor sit amet...
-            </Text>
-            <Text>
-            Baca Selengkapnya...
+            <Text style={{ marginBottom: 15 }}>
+              { this.state.getBarang.deskripsi ? this.state.getBarang.deskripsi : 'Lorem ipsum dolor sit amet lorem ipsum dolor sit amet lorem ipsum dolor sit amet lorem ipsum dolor sit amet' }
             </Text>
           </View>
-          <View style={styles.divider}/>
-          <View style={styles.main}>
-            <Grid>
-              <Col>
-                <Button info>
-                  <Text>Tambahkan ke Keranjang</Text>
-                </Button>
-              </Col>
-              <Col>
-              <Button success
-              onPress={() => this._doPayment() }>
-                  <Text>Beli Barang {this.state.idDocument}</Text>
-              </Button>
-              </Col>
-            </Grid>
-          </View>
-      </ScrollView>
+        </ScrollView>
+        <View style={{
+          elevation: 10,
+          backgroundColor: '#fff',
+          paddingLeft: 0.05 * deviceWidth,
+          paddingRight: 0.05 * deviceWidth,
+          paddingVertical: 15,
+          display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+            <Button info
+              onPress={this.addToCart}
+            >
+              <Text>Masukkan Keranjang</Text>
+            </Button>
+            <Button success
+              onPress={this._doPayment}>
+              <Text>Beli Barang {this.state.idDocument}</Text>
+            </Button>
+        </View>
+      </View>
     );
   }
 }
