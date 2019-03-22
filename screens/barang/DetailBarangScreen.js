@@ -126,7 +126,7 @@ export default class DetailBarangScreen extends React.Component {
     });
   }
 
-  _doPayment() {
+  _doPayment = () => {
     if (this.state.token == '') {
       Alert.alert(
         'Gagal',
@@ -145,6 +145,30 @@ export default class DetailBarangScreen extends React.Component {
       })
     }
   }
+
+  addToCart = async () => {
+    let cart = JSON.parse(await AsyncStorage.getItem('cart'));
+    if (! cart) {
+      cart = [];
+    }
+
+    let founded = false;
+    cart.map(val => {
+      if (val.id == this.state.key) {
+        founded = true;
+        val.jumlah = val.jumlah++;
+      }
+    });
+
+    if (! founded) {
+      const newItem = {id: this.state.key, jumlah: 1};
+      cart.push(newItem);
+    }
+
+    await AsyncStorage.setItem('cart', JSON.stringify(cart))
+      .then(() => Alert.alert('','Berhasil ditambahkan ke keranjang'))
+      .catch(() => Alert.alert('','Gagal ditambahkan ke keranjang'));
+  };
 
   render() {
     const images = [
@@ -242,11 +266,13 @@ export default class DetailBarangScreen extends React.Component {
           paddingRight: 0.05 * deviceWidth,
           paddingVertical: 15,
           display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Button info>
+            <Button info
+              onPress={this.addToCart}
+            >
               <Text>Masukkan Keranjang</Text>
             </Button>
             <Button success
-              onPress={() => this._doPayment()}>
+              onPress={this._doPayment}>
               <Text>Beli Barang {this.state.idDocument}</Text>
             </Button>
         </View>

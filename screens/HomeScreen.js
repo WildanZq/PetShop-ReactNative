@@ -7,19 +7,13 @@ import {
   ActivityIndicator,
   FlatList,
   NetInfo,
-  RefreshControl,
-  Keyboard
+  RefreshControl
 } from "react-native";
-import { Input } from 'react-native-elements';
 import {
   View,
   Text,
-  Content,
   Card,
-  CardItem,
   Icon,
-  Left,
-  Thumbnail
 } from "native-base";
 import Swiper from 'react-native-swiper';
 import Colors from '../constants/Colors';
@@ -30,6 +24,7 @@ import SearchInput from '../components/SearchInput';
 export default class HomeScreen extends React.Component {
   constructor() {
     super();
+
     NetInfo.isConnected.fetch().done((isConnected) => {
         if ( isConnected ) { firebase.firestore().enableNetwork(); }
         else { firebase.firestore().disableNetwork(); }
