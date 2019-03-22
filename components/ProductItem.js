@@ -5,13 +5,9 @@ import {
   Content,
   Card,
   CardItem,
-  Body,
-  Left,
-  Thumbnail,
-  Button,
-  Icon,
 } from "native-base";
 import NumberFormat from 'react-number-format';
+import Colors from '../constants/Colors';
 
 const ProductItem = ({ navigation, data }) => {
   return (
@@ -26,24 +22,16 @@ const ProductItem = ({ navigation, data }) => {
         }
       )}>
         <Card style={{ flex: 0, backgroundColor: '#ddd', height: "auto", elevation: 1.8,}}>
-            <CardItem cardBody>
+          <CardItem cardBody style={{ borderBottomWidth: 1, borderColor: Colors.divider }}>
               <Image
                 source={data.image? {uri: data.image} : require('../assets/images/no_img.jpeg')}
                 style={{height: 140, width: null, flex: 1}}/>
             </CardItem>
-            <CardItem style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+            <CardItem style={{ flexDirection: 'column', alignItems: 'flex-start', paddingTop: 8, paddingBottom: 8, paddingLeft: 10 }}>
               <Text>{data.title}</Text>
               <NumberFormat value={data.harga} displayType={'text'} thousandSeparator={'.'} decimalSeparator={','} prefix={'Rp'} 
               renderText={value => <Text note>{value}{"\n"}</Text>} />
             </CardItem>
-
-            <Button block small info>
-              <Icon
-                name='md-cart'
-                size={50}
-              />
-              <Text>Add to Cart</Text>
-            </Button>
         </Card>
       </TouchableOpacity>
     </Content>

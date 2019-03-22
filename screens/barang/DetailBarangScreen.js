@@ -156,7 +156,7 @@ export default class DetailBarangScreen extends React.Component {
     cart.map(val => {
       if (val.id == this.state.key) {
         founded = true;
-        val.jumlah = val.jumlah++;
+        val.jumlah++;
       }
     });
 
