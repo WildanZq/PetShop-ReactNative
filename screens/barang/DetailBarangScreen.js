@@ -117,38 +117,38 @@ export default class DetailBarangScreen extends React.Component {
 
   componentDidMount() {
     const { params } = this.props.navigation.state;
-    const boardKey = params ? params.boardKey: null;
+    const boardKey = params ? params.boardKey : null;
 
-     const ref = firebase.firestore().collection('boards').doc(`${JSON.parse(boardKey)}`);
-     ref.get().then((doc) => {
-       if (doc.exists) {
-         this.setState({
-           getBarang: doc.data(),
-           key: doc.id,
-           isLoading: false,
-         });
-       } else {
-         console.log("No such document!");
-       }
-     });
+    const ref = firebase.firestore().collection('boards').doc(`${JSON.parse(boardKey)}`);
+    ref.get().then((doc) => {
+      if (doc.exists) {
+        this.setState({
+          getBarang: doc.data(),
+          key: doc.id,
+          isLoading: false,
+        });
+      } else {
+        console.log("No such document!");
+      }
+    });
 
     AsyncStorage.getItem('userToken', (error, result) => {
-        if (result) {
-          this.setState({
-            token: result,
-          });
-        }
+      if (result) {
+        this.setState({
+          token: result,
+        });
+      }
     });
   }
 
   _doPayment() {
-    if(this.state.token=='') {
+    if (this.state.token == '') {
       Alert.alert(
         'Gagal',
         'Silakan Login Terlebih Dahulu',
         [
-          {text: 'Cancel', onPress: () => console.log('Cancel Pressed!')},
-          {text: 'OK', onPress: () => this.props.navigation.navigate("SignIn")},
+          { text: 'Cancel', onPress: () => console.log('Cancel Pressed!') },
+          { text: 'OK', onPress: () => this.props.navigation.navigate("SignIn") },
         ],
         { cancelable: false }
       );
