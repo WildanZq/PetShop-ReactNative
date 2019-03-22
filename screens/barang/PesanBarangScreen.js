@@ -57,7 +57,8 @@ export default class PesanBarangScreen extends React.Component {
 
         let barang = [];
         this.state.data.map(val => {
-            barang.push(firebase.firestore().doc(`/boards/${val.key}`));
+            const newBarang = { jumlah: val.jumlah, barang: firebase.firestore().doc(`/boards/${val.key}`) };
+            barang.push(newBarang);
         });
         
         this.ref.add({
@@ -70,6 +71,9 @@ export default class PesanBarangScreen extends React.Component {
             console.error("Error adding user: ", error);
         });
 
+        if (this.props.navigation.state.params.eraseCart) {
+            AsyncStorage.removeItem('cart');
+        }
         Alert.alert('', 'Pembelian Berhasil');
         this.props.navigation.navigate('Transaksi');
     }

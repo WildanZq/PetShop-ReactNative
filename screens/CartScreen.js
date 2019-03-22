@@ -26,27 +26,35 @@ export default class CartScreen extends React.Component {
 
   componentDidMount() {
     this.getData();
+    setInterval(this.getData, 3000);
   }
 
   getData = async () => {
     if (this.state.loading) return;
 
-    this.setState({ loading: true, data: [] });
     const cart = JSON.parse(await AsyncStorage.getItem('cart'));
 
     if (! cart) {
-      this.setState({ loading: false });
+      this.setState({ loading: false, data: [] });
       return;
     }
 
+    const data = [];
     cart.map(async value => {
       const ref = await firebase.firestore().collection('boards').doc(value.id);
       ref.get().then((doc) => {
         if (doc.exists) {
           const item = {...doc.data(), jumlah: value.jumlah, key: doc.id};
-          let newData = this.state.data;
+          let newData = data;
+          let match = false;
+          this.state.data.map(val => {
+            if (JSON.stringify(item) === JSON.stringify(val)) {
+              match = true;
+            }
+          });
           newData.push(item);
-          this.setState({ data: newData });
+          if (!match)
+            this.setState({ data: newData });
         }
       });
     });
@@ -187,8 +195,10 @@ export default class CartScreen extends React.Component {
       );
     }
     else {
+      if (! await AsyncStorage.getItem('cart')) return;
       this.props.navigation.navigate("PesanBarang", {
-        barang: JSON.parse(await AsyncStorage.getItem('cart'))
+        barang: JSON.parse(await AsyncStorage.getItem('cart')),
+        eraseCart: true
       })
     }
   }
