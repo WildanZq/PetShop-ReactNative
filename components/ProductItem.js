@@ -21,32 +21,23 @@ const ProductItem = ({ navigation, data }) => {
         navigation.navigate("DetailBarang",
         {
           key: navigation.state.key,
-          boardKey:`${JSON.stringify(data.key)}`
+          boardKey:`${JSON.stringify(data.key)}`,
+          title: `${data.title}`
         }
       )}>
         <Card style={{ flex: 0, backgroundColor: '#ddd', height: "auto", elevation: 1.8,}}>
-          <CardItem cardBody>
-            <Image
-              source={{ uri: 'https://img.purch.com/w/660/aHR0cDovL3d3dy5saXZlc2NpZW5jZS5jb20vaW1hZ2VzL2kvMDAwLzA4OC85MTEvb3JpZ2luYWwvZ29sZGVuLXJldHJpZXZlci1wdXBweS5qcGVn'}}
-              style={{height: 140, width: null, flex: 1}}/>
-          </CardItem>
-          <CardItem style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-            <Text>{data.title}</Text>
-            <NumberFormat value={data.harga} displayType={'text'} thousandSeparator={'.'} decimalSeparator={','} prefix={'Rp'} 
-            renderText={value => <Text note>{value}{"\n\n"}</Text>} />
-            <Button rounded block small success
-            onPress={() =>
-              navigation.navigate("PesanBarang",
-              {
-                key: navigation.state.key,
-                boardKey:`${JSON.stringify(data.key)}`
-              }
-            )}>
-              <Text>Beli</Text>
-            </Button>
-          </CardItem>
+            <CardItem cardBody>
+              <Image
+                source={data.image? {uri: data.image} : require('../assets/images/no_img.jpeg')}
+                style={{height: 140, width: null, flex: 1}}/>
+            </CardItem>
+            <CardItem style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+              <Text>{data.title}</Text>
+              <NumberFormat value={data.harga} displayType={'text'} thousandSeparator={'.'} decimalSeparator={','} prefix={'Rp'} 
+              renderText={value => <Text note>{value}{"\n"}</Text>} />
+            </CardItem>
 
-            <Button block small  info>
+            <Button block small info>
               <Icon
                 name='md-cart'
                 size={50}

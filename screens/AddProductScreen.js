@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet } from 'react-native';
 import { Button, Text, View } from 'native-base';
 import { TextInput, Picker, Image, Alert, AsyncStorage, ActivityIndicator } from 'react-native';
 import { ImagePicker } from 'expo';
+import uuid from 'uuid';
 
 import Colors from '../constants/Colors';
 import firebase from "../Firebase";
@@ -104,8 +105,36 @@ export default class AddProductScreen extends React.Component {
     let result = await ImagePicker.launchImageLibraryAsync({});
 
     if (!result.cancelled) {
+      //uploadUrl = await this.uploadImageAsync(result.uri);
       this.setState({ img: result.uri });
     }
+  }
+
+  uploadImageAsync = async (uri) => {
+    const blob = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function (e) {
+        console.log(e);
+        reject(new TypeError('Network request failed'));
+      };
+      xhr.responseType = 'blob';
+      xhr.open('GET', uri, true);
+      xhr.send(null);
+    });
+
+    const ref = firebase
+      .storage()
+      .ref()
+      .child("images/barang/"+uuid.v4());
+    const snapshot = await ref.put(blob);
+
+    // We're done with the blob, close and release it
+    blob.close();
+
+    return await snapshot.ref.getDownloadURL();
   }
 
   addProduct = async () => {
@@ -117,9 +146,12 @@ export default class AddProductScreen extends React.Component {
 
     this.setState({ loading: true });
     const db = firebase.firestore();
+    
+    uploadUrl = await this.uploadImageAsync(this.state.img);
 
     await db.collection('boards').add({
       title: this.state.title,
+      image: uploadUrl,
       harga: this.state.harga,
       kategori: this.state.kategori,
       stok: this.state.stok,

@@ -3,7 +3,8 @@ import {
   Image,
   StyleSheet,
   AsyncStorage,
-  ActivityIndicator
+  ActivityIndicator,
+  FlatList
 } from 'react-native'
 import { View, Button, Text } from 'native-base'
 import firebase from "../Firebase";
@@ -102,7 +103,10 @@ export default class ProfileScreen extends Component {
       isLoading: true,
       getUser: {},
       key: '',
+      penjualan: []
     };
+
+    this.unsubscribe = null;
   }
 
   _signIn = () =>  {
@@ -118,15 +122,48 @@ export default class ProfileScreen extends Component {
     });
   };
 
+  onCollectionUpdate = querySnapshot => {
+    const penjualan = [];
+
+    querySnapshot.forEach(doc => {
+      let newItem = doc.data();
+      newItem.id = doc.id;
+
+      if (newItem.barang != null) {
+        newItem.barang.get()
+          .then(res => {
+            newItem.barangData = res.data()
+
+            if (newItem.barangData != null) {
+              penjualan.push(newItem);
+              this.setState({
+                penjualan: penjualan
+              })
+              console.log(newItem.barangData.title)
+            }
+          })
+          .catch(err => console.error(err));
+      } else {
+        penjualan.push(newItem);
+      }
+    });
+  };
+
   _showData = async () =>  {
     await AsyncStorage.getItem('userToken', (error, result) => {
         if (result) {
+          const userRef = firebase.firestore().collection('user').doc(result);
+
+          this.dataNya = firebase.firestore().collection('penjualan').where('pembeli', '==', userRef);
+          this.unsubscribe = this.dataNya.onSnapshot(this.onCollectionUpdate);
+
           const ref = firebase.firestore().collection('user').doc(result);
+
           ref.get().then((doc) => {
             if (doc.exists) {
               this.setState({
                 getUser: doc.data(),
-                key: doc.id,
+                key: result,
                 isLoading: false,
               });
             } else {
@@ -142,12 +179,12 @@ export default class ProfileScreen extends Component {
     });
   };
 
-  addProduct = () => {
-    this.props.navigation.navigate('AddProduct');
-  }
-
   componentDidMount() {
     this._showData();
+  }
+
+  addProduct = () => {
+    this.props.navigation.navigate('AddProduct');
   }
 
   renderDefault = () => {
@@ -196,10 +233,18 @@ export default class ProfileScreen extends Component {
             <Button rounded danger onPress={this._signOutAsync}><Text> Sign Out </Text></Button>
           </View>
         </View>
+
+        <FlatList
+            data={this.state.penjualan}
+            keyExtractor={(item, index) => item.id}
+            renderItem={({ item }) => (
+              <Text>{ item.barangData.title }</Text>
+            )}
+        />
       </View>
     )
   }
-
+  
   render() {
     const isLoggedIn = this.state.key;
 

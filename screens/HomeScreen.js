@@ -55,11 +55,11 @@ export default class HomeScreen extends React.Component {
            <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 10 }}>
              <View style={{ flex: .125, alignItems: 'center' }}>
                <Image
-                 style={{ width: 35, height: 35 }}
+                 style={{ width: 40, height: 40 }}
                  source={require('../assets/images/icon-transparent.png')}
                />
              </View>
-             <View style={{ flex: .75 }} >
+             <View style={{ flex: .95 }} >
                <TouchableOpacity activeOpacity={1} onPress={() => console.log('search clicked')} >
                <SearchInput
                value={params.kataKunci}
@@ -72,7 +72,7 @@ export default class HomeScreen extends React.Component {
              <View style={{ flex: .125, alignItems: 'center' }}>
                <TouchableOpacity onPress={() => console.log('cart clicked')} >
                  <Icon
-                   name='md-cart'
+                   name='md-heart'
                    size={50}
                    style={{ color: '#fff' }}
                  />
@@ -88,7 +88,7 @@ export default class HomeScreen extends React.Component {
       });
 
       if (value.length > 0) {
-        this.ref = firebase.firestore().collection('boards').orderBy('title').startAt(value.toLowerCase()).endAt(value.toLowerCase() + '\uf8ff');
+        this.ref = firebase.firestore().collection('boards').orderBy('title').startAt(value).endAt(value + '\uf8ff');
         this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
       }
       else {
@@ -100,11 +100,12 @@ export default class HomeScreen extends React.Component {
   onCollectionUpdate = querySnapshot => {
     const boards = [];
     querySnapshot.forEach(doc => {
-      const { title, kategori, harga } = doc.data();
+      const { title, image, kategori, harga } = doc.data();
       boards.push({
         key: doc.id,
         doc, // DocumentSnapshot
         title,
+        image,
         kategori,
         harga
       });
@@ -129,24 +130,20 @@ export default class HomeScreen extends React.Component {
 
   renderHeadLayout() {
     return (
-      <View>
+      <View style={{ backgroundColor: '#f5f5f5' }}>
         <View style={{height:160}}>
           <Swiper showsButtons={true} autoplay={true}>
             <View style={styleSlider.slide1}>
-            <Image
-              style={{width: 400, height: 300}}
-              source={{uri: 'https://www.barnesandnoble.com/blog/sci-fi-fantasy/wp-content/uploads/sites/4/2017/07/onepiece2.jpg'}}
-            />
+            <Text style={styleSlider.text}>PROMOSI ke-1</Text>
             </View>
             <View style={styleSlider.slide2}>
-              <Text style={styleSlider.text}>Beautiful</Text>
+              <Text style={styleSlider.text}>PROMOSI ke-2</Text>
             </View>
             <View style={styleSlider.slide3}>
-              <Text style={styleSlider.text}>And simple</Text>
+              <Text style={styleSlider.text}>PROMOSI ke-3</Text>
             </View>
           </Swiper>
         </View>
-
 
         <Card
           style={{
@@ -155,9 +152,10 @@ export default class HomeScreen extends React.Component {
             justifyContent: "center",
             alignItems: "center",
             height: "auto",
-            elevation: 1.5,
+            elevation: 0,
             marginTop: 0,
             marginRight: 0,
+            marginBottom: 15,
             marginLeft: 0,
             flexWrap: 'wrap',
             paddingVertical: 16,
@@ -165,37 +163,79 @@ export default class HomeScreen extends React.Component {
           }}
         >
           <View>
-            <TouchableOpacity style={styles.menuIcon}>
+            <TouchableOpacity style={styles.menuIcon}
+            onPress={() =>
+              this.props.navigation.navigate("KategoriBarang",
+              {
+                key: this.props.navigation.state.key,
+                refKategori: 'adopsi'
+              }
+            )}>
               <Icon type="MaterialIcons" name="pets" size={18} style={{ color: '#ffc956' }} />
             </TouchableOpacity>
             <Text style={styles.menuLabel}>Adopsi</Text>
           </View>
           <View>
-            <TouchableOpacity style={styles.menuIcon}>
+            <TouchableOpacity style={styles.menuIcon}
+            onPress={() =>
+              this.props.navigation.navigate("KategoriBarang",
+              {
+                key: this.props.navigation.state.key,
+                refKategori: 'makanan'
+              }
+            )}>
               <Icon type="MaterialCommunityIcons" name="food" size={18} style={{ color: "#3ebc42" }} />
             </TouchableOpacity>
             <Text style={styles.menuLabel}>Makanan</Text>
           </View>
           <View>
-            <TouchableOpacity style={styles.menuIcon}>
+            <TouchableOpacity style={styles.menuIcon}
+            onPress={() =>
+              this.props.navigation.navigate("KategoriBarang",
+              {
+                key: this.props.navigation.state.key,
+                refKategori: 'aksesoris'
+              }
+            )}>
               <Icon type="MaterialCommunityIcons" name="tshirt-crew" size={18} style={{ color: '#d2e524' }} />
             </TouchableOpacity>
             <Text style={styles.menuLabel}>Aksesoris</Text>
           </View>
           <View>
-            <TouchableOpacity style={styles.menuIcon}>
+            <TouchableOpacity style={styles.menuIcon}
+            onPress={() =>
+              this.props.navigation.navigate("KategoriBarang",
+              {
+                key: this.props.navigation.state.key,
+                refKategori: 'mainan'
+              }
+            )}>
               <Icon type="Ionicons" name="ios-baseball" size={18} style={{ color: '#942bb5' }} />
             </TouchableOpacity>
             <Text style={styles.menuLabel}>Mainan</Text>
           </View>
           <View>
-            <TouchableOpacity style={styles.menuIcon}>
+            <TouchableOpacity style={styles.menuIcon}
+            onPress={() =>
+              this.props.navigation.navigate("KategoriBarang",
+              {
+                key: this.props.navigation.state.key,
+                refKategori: 'kesehatan'
+              }
+            )}>
               <Icon type="FontAwesome" name="stethoscope" size={18} style={{ color: '#359fa3' }} />
             </TouchableOpacity>
             <Text style={styles.menuLabel}>Kesehatan</Text>
           </View>
           <View>
-            <TouchableOpacity style={styles.menuIcon}>
+            <TouchableOpacity style={styles.menuIcon}
+            onPress={() =>
+              this.props.navigation.navigate("KategoriBarang",
+              {
+                key: this.props.navigation.state.key,
+                refKategori: 'suplemen'
+              }
+            )}>
               <Icon type="MaterialCommunityIcons" name="pill" size={18} style={{ color: '#c62121' }} />
             </TouchableOpacity>
             <Text style={styles.menuLabel}>Suplemen</Text>
@@ -229,7 +269,7 @@ export default class HomeScreen extends React.Component {
         showsVerticalScrollIndicator={false}>
           {this.state.kataKunci? null: this.renderHeadLayout()}
           <View style={{ paddingLeft: 10 }}>
-            <Text style={{ color: Colors.primaryText, fontSize: 18, marginTop: 20 }}>
+            <Text style={{ color: Colors.primaryText, fontSize: 15, marginTop: 20 }}>
               {this.state.kataKunci? `Hasil Pencarian: "`+this.state.kataKunci+`"`: `Rekomendasi untuk Anda`}
             </Text>
           </View>
