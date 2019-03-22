@@ -13,7 +13,7 @@ import {
   View,
   Text,
   Card,
-  Icon,
+  Icon
 } from "native-base";
 import Swiper from 'react-native-swiper';
 import Colors from '../constants/Colors';
@@ -37,7 +37,6 @@ export default class HomeScreen extends React.Component {
       boards: []
     };
     this.ref = firebase.firestore().collection("boards");
-    //firebase.firestore().collection("boards").where('title', '==', this.state.kataKunci)
   }
 
   static navigationOptions =  ({ navigation }) => {
@@ -98,7 +97,7 @@ export default class HomeScreen extends React.Component {
       const { title, image, kategori, harga } = doc.data();
       boards.push({
         key: doc.id,
-        doc, // DocumentSnapshot
+        doc,
         title,
         image,
         kategori,
@@ -302,29 +301,6 @@ export default class HomeScreen extends React.Component {
       horizontal={false}
       numColumns={2}
     />);
-  }
-
-  _maybeRenderDevelopmentModeWarning() {
-    if (__DEV__) {
-      const learnMoreButton = (
-        <Text onPress={this._handleLearnMorePress} style={styles.helpLinkText}>
-          Learn more
-        </Text>
-      );
-
-      return (
-        <Text style={styles.developmentModeText}>
-          Development mode is enabled, your app will be slower but you can use
-          useful development tools. {learnMoreButton}
-        </Text>
-      );
-    } else {
-      return (
-        <Text style={styles.developmentModeText}>
-          You are not in development mode, your app will run at full speed.
-        </Text>
-      );
-    }
   }
 
   _handleLearnMorePress = () => {
