@@ -215,8 +215,8 @@ export default class DetailBarangScreen extends React.Component {
             <Text style={[styles.textDefault, styles.itemName, styles.bold]}>
               {this.state.getBarang.title}
             </Text>
-            <NumberFormat value={this.state.getBarang.harga} displayType={'text'} thousandSeparator={'.'} decimalSeparator={','} prefix={'Rp'} 
-            renderText={value => 
+            <NumberFormat value={this.state.getBarang.harga} displayType={'text'} thousandSeparator={'.'} decimalSeparator={','} prefix={'Rp'}
+            renderText={value =>
             <Text style={[styles.textDefault, styles.itemPrice, styles.semiBold]}>{value}{"\n\n"}</Text>} />
           </View>
           <View style={styles.divider}/>
@@ -225,9 +225,9 @@ export default class DetailBarangScreen extends React.Component {
               Informasi Produk
             </Text>
             <Text>
-              Pemesanan Minimum : 1 pcs
-              Kondisi : Baru
-              Berat : 100 gram
+              Pemesanan Minimum : 1 pcs\n
+              Kondisi : Baru\n
+              Berat : 100 gram\n
             </Text>
             <Text style={[styles.textDefault, styles.semiBold]}>
               Deskripsi Produk
@@ -248,7 +248,7 @@ export default class DetailBarangScreen extends React.Component {
                 </Button>
               </Col>
               <Col>
-              <Button success 
+              <Button success
               onPress={() => this._doPayment() }>
                   <Text>Beli Barang {this.state.idDocument}</Text>
               </Button>

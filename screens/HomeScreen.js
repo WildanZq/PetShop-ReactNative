@@ -134,13 +134,22 @@ export default class HomeScreen extends React.Component {
         <View style={{height:160}}>
           <Swiper showsButtons={true} autoplay={true}>
             <View style={styleSlider.slide1}>
-            <Text style={styleSlider.text}>PROMOSI ke-1</Text>
+              <Image
+                style={{height: 160, width: 370}}
+                source={require('../assets/images/poster1.png')}
+              />
             </View>
             <View style={styleSlider.slide2}>
-              <Text style={styleSlider.text}>PROMOSI ke-2</Text>
+              <Image
+                style={{height: 160, width: 370}}
+                source={require('../assets/images/poster2.png')}
+              />
             </View>
             <View style={styleSlider.slide3}>
-              <Text style={styleSlider.text}>PROMOSI ke-3</Text>
+              <Image
+                style={{height: 160, width: 370}}
+                source={require('../assets/images/poster3.png')}
+              />
             </View>
           </Swiper>
         </View>
