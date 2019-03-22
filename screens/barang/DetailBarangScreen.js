@@ -225,9 +225,9 @@ export default class DetailBarangScreen extends React.Component {
               Informasi Produk
             </Text>
             <Text>
-              Pemesanan Minimum : 1 pcs\n
-              Kondisi : Baru\n
-              Berat : 100 gram\n
+              Pemesanan Minimum : 1 pcs
+              Kondisi : Baru
+              Berat : 100 gram
             </Text>
             <Text style={[styles.textDefault, styles.semiBold]}>
               Deskripsi Produk
