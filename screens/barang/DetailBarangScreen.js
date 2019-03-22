@@ -140,8 +140,7 @@ export default class DetailBarangScreen extends React.Component {
     }
     else {
       this.props.navigation.navigate("PesanBarang", {
-        key: this.props.navigation.state.key,
-        boardKey: this.state.key
+        barang: [{id: this.state.key, jumlah: 1}]
       })
     }
   }
@@ -265,15 +264,18 @@ export default class DetailBarangScreen extends React.Component {
           paddingLeft: 0.05 * deviceWidth,
           paddingRight: 0.05 * deviceWidth,
           paddingVertical: 15,
-          display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+          display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
             <Button info
               onPress={this.addToCart}
+              style={{ height: 30, marginRight: 10 }}
             >
-              <Text>Masukkan Keranjang</Text>
+              <Text style={{ fontSize: 14 }}>Masukkan Keranjang</Text>
             </Button>
             <Button success
-              onPress={this._doPayment}>
-              <Text>Beli Barang {this.state.idDocument}</Text>
+              style={{ height: 30 }}
+              onPress={this._doPayment}
+            >
+              <Text style={{ fontSize: 14 }}>Beli Barang {this.state.idDocument}</Text>
             </Button>
         </View>
       </View>

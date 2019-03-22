@@ -1,21 +1,6 @@
 import React from 'react';
-import { AsyncStorage, Alert } from "react-native";
-import {
-    View,
-    Text,
-    Container,
-    Header,
-    Content,
-    Card,
-    CardItem,
-    Body,
-    H3,
-    Right,
-    Icon,
-    Button,
-    Item,
-    Input,
-} from "native-base";
+import { AsyncStorage, Alert, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, Button } from "native-base";
 import firebase from "../../Firebase";
 import Colors from '../../constants/Colors';
 import NumberFormat from 'react-number-format';
@@ -32,85 +17,103 @@ export default class PesanBarangScreen extends React.Component {
     constructor() {
         super();
         this.state = {
-            idDocument: '',
             token: '',
-            getBarang: {},
-            key: '',
+            data: [],
+            total: 0,
+            loading: true
         };
     }
 
     componentDidMount() {
         const { params } = this.props.navigation.state;
-        const boardKey = params ? params.boardKey: null;
+        const barang = params.barang;
 
-        const ref = firebase.firestore().collection('boards').doc(boardKey);
-        ref.get().then((doc) => {
-            if (doc.exists) {
-                this.setState({
-                    getBarang: doc.data(),
-                    key: doc.id,
-                    isLoading: false,
-                });
-            } else {
-                console.log("No such document!");
-            }
+        barang.map(data => {
+            const ref = firebase.firestore().collection('boards').doc(data.id);
+            ref.get().then((doc) => {
+                if (doc.exists) {
+                    let newData = this.state.data;
+                    newData.push({ ...doc.data(), key: doc.id, jumlah: data.jumlah });
+                    this.setState({
+                        data: newData,
+                        total: this.state.total + (doc.data().harga*data.jumlah),
+                        loading: false
+                    });
+                }
+            });
         });
 
         AsyncStorage.getItem('userToken', (error, result) => {
             if (result) {
-                this.setState({
-                    token: result,
-                });
+                this.setState({ token: result });
             }
         });
     }
 
     _doTransaksi = () => {
+        if (this.state.loading) return;
+
         this.ref = firebase.firestore().collection('penjualan');
+
+        let barang = [];
+        this.state.data.map(val => {
+            barang.push(firebase.firestore().doc(`/boards/${val.key}`));
+        });
         
         this.ref.add({
             pembeli: firebase.firestore().doc(`/user/${this.state.token}`),
-            barang: firebase.firestore().doc(`/boards/${this.state.key}`),
+            barang: barang,
             tanggal: firebase.firestore.FieldValue.serverTimestamp(),
-            total: `${this.state.getBarang.harga}`,
+            total: `${this.state.total}`,
         })
         .catch((error) => {
             console.error("Error adding user: ", error);
         });
 
-        Alert.alert('', 'Pembelian Berhasil Dilakukan!');
-        this.props.navigation.navigate("Main");
+        Alert.alert('', 'Pembelian Berhasil');
+        this.props.navigation.navigate('Transaksi');
     }
+
+    renderBarang = () => {
+        if (this.state.loading) {
+            return (
+                <View style={{ marginTop: 60 }}>
+                    <ActivityIndicator size="large" color={Colors.primary} />
+                </View>
+            );
+        }
+
+        return this.state.data.map(data => {
+            return (
+                <View key={data.key} style={{ borderBottomWidth: 1, borderColor: Colors.divider, paddingVertical: 5, flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <View>
+                        <Text style={{ fontWeight: 'bold' }}>{data.title}</Text>
+                        <Text>Jumlah: {data.jumlah}</Text>
+                    </View>
+                    <NumberFormat value={data.harga * data.jumlah} displayType={'text'} thousandSeparator={'.'} decimalSeparator={','} prefix={'Rp '}
+                        renderText={value => <Text>{value}</Text>}
+                    />
+                </View>
+            );
+        });
+    };
 
     render() {
         return ( 
-        <Content>
-          <Card style={{marginTop:20, backgroundColor:'#f5f5f5', flex: 1,}}>
-            <CardItem>
-              <Body>
-                <Text>{this.state.getBarang.title}</Text>  
-              </Body>
-              <Right><NumberFormat value={this.state.getBarang.harga} displayType={'text'} thousandSeparator={'.'} decimalSeparator={','} prefix={'Rp'} 
-            renderText={value => 
-            <Text>{value}{"\n\n"}</Text>} />
-          </Right>
-            </CardItem>
-          </Card>
-
-          <Card transparent style={{marginTop:20, backgroundColor:'#f5f5f5', flex: 1,}}>
-            <CardItem>
-              <Right><NumberFormat value={this.state.getBarang.harga} displayType={'text'} thousandSeparator={'.'} decimalSeparator={','} prefix={'Rp'} 
-            renderText={value => 
-            <H3>TOTAL: {value}{"\n\n"}</H3>} />
-          </Right>
-            </CardItem>
-          </Card>
-
-            <Button block success
-            onPress={() => {this._doTransaksi()} }>
-                <Text>Konfirmasi Pembayaran</Text>
-            </Button>
-        </Content>
+            <View style={{ flex: 1 }}>
+                <ScrollView style={{ paddingHorizontal: 16 }}>
+                    {this.renderBarang()}
+                </ScrollView>
+                <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 10, borderTopWidth: 1, borderColor: Colors.divider }}>
+                    <View style={{ display: 'flex' }}>
+                        <Text>Total</Text>
+                        <NumberFormat value={this.state.total} displayType={'text'} thousandSeparator={'.'} decimalSeparator={','} prefix={'Rp '}
+                            renderText={value => <Text style={{ fontWeight: 'bold' }}>{value}</Text>}
+                        />
+                    </View>
+                    <Button onPress={this._doTransaksi} style={{ marginTop: 6, backgroundColor: Colors.primary, height: 30 }}><Text style={{ color: '#fff' }}>KONFIRMASI</Text></Button>
+                </View>
+            </View>
         );
     }
 }

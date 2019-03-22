@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleSheet, AsyncStorage, ActivityIndicator, Image } from 'react-native';
+import { ScrollView, StyleSheet, AsyncStorage, ActivityIndicator, Image, Alert } from 'react-native';
 import { View, Text, Icon, Button } from 'native-base';
 import NumberFormat from 'react-number-format';
 
@@ -33,6 +33,11 @@ export default class CartScreen extends React.Component {
 
     this.setState({ loading: true, data: [] });
     const cart = JSON.parse(await AsyncStorage.getItem('cart'));
+
+    if (! cart) {
+      this.setState({ loading: false });
+      return;
+    }
 
     cart.map(async value => {
       const ref = await firebase.firestore().collection('boards').doc(value.id);
@@ -168,6 +173,26 @@ export default class CartScreen extends React.Component {
     }
   };
 
+  _doPayment = async () => {
+    const token = await AsyncStorage.getItem('userToken');
+    if (! token) {
+      Alert.alert(
+        'Gagal',
+        'Silakan Login Terlebih Dahulu',
+        [
+          { text: 'Cancel', onPress: () => console.log('Cancel Pressed!') },
+          { text: 'OK', onPress: () => this.props.navigation.navigate("SignIn") },
+        ],
+        { cancelable: false }
+      );
+    }
+    else {
+      this.props.navigation.navigate("PesanBarang", {
+        barang: JSON.parse(await AsyncStorage.getItem('cart'))
+      })
+    }
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -187,7 +212,9 @@ export default class CartScreen extends React.Component {
                 style={{ color: '#fff', marginHorizontal: 16 }}
               />
             </Button>
-            <Button style={{ backgroundColor: Colors.primary, height: 30 }}><Text style={{ color: '#fff' }}>Bayar</Text></Button>
+            <Button onPress={this._doPayment} style={{ backgroundColor: Colors.primary, height: 30 }}>
+              <Text style={{ color: '#fff' }}>Bayar</Text>
+            </Button>
           </View>
         </View>
       </View>
