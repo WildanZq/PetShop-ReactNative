@@ -55,11 +55,11 @@ export default class HomeScreen extends React.Component {
            <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 10 }}>
              <View style={{ flex: .125, alignItems: 'center' }}>
                <Image
-                 style={{ width: 40, height: 40 }}
+                 style={{ width: 35, height: 35 }}
                  source={require('../assets/images/icon-transparent.png')}
                />
              </View>
-             <View style={{ flex: .95 }} >
+             <View style={{ flex: .75 }} >
                <TouchableOpacity activeOpacity={1} onPress={() => console.log('search clicked')} >
                <SearchInput
                value={params.kataKunci}
