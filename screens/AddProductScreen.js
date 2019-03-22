@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
-import { Button, Text, View } from 'native-base';
+import { Button, Text, View, Icon } from 'native-base';
 import { TextInput, Picker, Image, Alert, AsyncStorage, ActivityIndicator } from 'react-native';
 import { ImagePicker } from 'expo';
 import uuid from 'uuid';
@@ -25,6 +25,7 @@ export default class AddProductScreen extends React.Component {
       harga: null,
       kategori: 'adopsi',
       stok: null,
+      deskripsi: null,
       loading: false
     };
   }
@@ -55,47 +56,63 @@ export default class AddProductScreen extends React.Component {
     return (
       <ScrollView style={styles.container}>
         {this.renderImg()}
-        <Button style={{ marginVertical: 10 }} onPress={this.chooseImg}><Text>Pilih Gambar</Text></Button>
-        <Text>Nama</Text>
-        <TextInput
-          placeholder='Kucing'
-          onSubmitEditing={this.addProduct}
-          style={styles.input}
-          onChangeText={(e) => this.setState({ title: e })}
-          value={this.state.title}/>
-        <Text>Harga</Text>
-        <TextInput
-          placeholder='800000'
-          onSubmitEditing={this.addProduct}
-          keyboardType='numeric'
-          style={styles.input}
-          onChangeText={(e) => this.setState({ harga: e })}
-          value={this.state.harga}/>
-        <Text>Kategori</Text>
-        <Picker
-          selectedValue={this.state.kategori}
-          style={styles.input}
-          onValueChange={(itemValue, itemIndex) =>
-            this.setState({kategori: itemValue})
-          }>
-          <Picker.Item label="Adopsi" value="adopsi" />
-          <Picker.Item label="Makanan" value="makanan" />
-          <Picker.Item label="Aksesoris" value="aksesoris" />
-          <Picker.Item label="Mainan" value="mainan" />
-          <Picker.Item label="Kesehatan" value="kesehatan" />
-          <Picker.Item label="Suplemen" value="suplemen" />
-        </Picker>
-        <Text>Stok</Text>
-        <TextInput
-          placeholder='10'
-          onSubmitEditing={this.addProduct}
-          keyboardType='numeric'
-          style={styles.input}
-          onChangeText={(e) => this.setState({ stok: e })}
-          value={this.state.stok} />
-        <View style={{ flex: 1, justifyContent: 'flex-end', flexDirection: 'row', marginBottom: 10 }}>
-          <Button danger style={{ borderRadius: 6, paddingHorizontal: 15, marginRight: 10 }} onPress={() => this.props.navigation.goBack()}><Text>Batal</Text></Button>
-          <Button style={{ backgroundColor: Colors.accent, borderRadius: 6, paddingHorizontal: 15 }} onPress={this.addProduct}>{this.renderBtnInner()}</Button>
+        <Button style={{ backgroundColor: '#fff', borderRadius: 50, width: 50, height: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'absolute', top: 275, right: 15 }} onPress={this.chooseImg}>
+          <Icon
+            name='md-camera'
+            size={56}
+            style={{ color: Colors.primary, marginLeft: 0, marginRight: 0 }}
+          />
+        </Button>
+        <View style={{ paddingHorizontal: 20 }}>
+          <Text>Nama</Text>
+          <TextInput
+            placeholder='Kucing'
+            onSubmitEditing={this.addProduct}
+            style={styles.input}
+            onChangeText={(e) => this.setState({ title: e })}
+            value={this.state.title}/>
+          <Text>Harga</Text>
+          <TextInput
+            placeholder='800000'
+            onSubmitEditing={this.addProduct}
+            keyboardType='numeric'
+            style={styles.input}
+            onChangeText={(e) => this.setState({ harga: e })}
+            value={this.state.harga}/>
+          <Text>Kategori</Text>
+          <Picker
+            selectedValue={this.state.kategori}
+            style={styles.input}
+            onValueChange={(itemValue, itemIndex) =>
+              this.setState({kategori: itemValue})
+            }>
+            <Picker.Item label="Adopsi" value="adopsi" />
+            <Picker.Item label="Makanan" value="makanan" />
+            <Picker.Item label="Aksesoris" value="aksesoris" />
+            <Picker.Item label="Mainan" value="mainan" />
+            <Picker.Item label="Kesehatan" value="kesehatan" />
+            <Picker.Item label="Suplemen" value="suplemen" />
+          </Picker>
+          <Text>Stok</Text>
+          <TextInput
+            placeholder='10'
+            onSubmitEditing={this.addProduct}
+            keyboardType='numeric'
+            style={styles.input}
+            onChangeText={(e) => this.setState({ stok: e })}
+            value={this.state.stok} />
+          <Text>Deskripsi</Text>
+          <TextInput
+            placeholder='Lorem ipsum'
+            style={styles.input}
+            multiline={true}
+            numberOfLines={4}
+            onChangeText={(e) => this.setState({ deskripsi: e })}
+            value={this.state.deskripsi} />
+          <View style={{ flex: 1, justifyContent: 'flex-end', flexDirection: 'row', marginBottom: 10 }}>
+            <Button danger style={{ borderRadius: 6, paddingHorizontal: 15, marginRight: 10 }} onPress={() => this.props.navigation.goBack()}><Text>Batal</Text></Button>
+            <Button style={{ backgroundColor: Colors.accent, borderRadius: 6, paddingHorizontal: 15 }} onPress={this.addProduct}>{this.renderBtnInner()}</Button>
+          </View>
         </View>
       </ScrollView>
     );
@@ -155,6 +172,7 @@ export default class AddProductScreen extends React.Component {
       harga: this.state.harga,
       kategori: this.state.kategori,
       stok: this.state.stok,
+      deskripsi: this.state.deskripsi,
       uid: await AsyncStorage.getItem('userToken')
     })
       .then(this.goBack)
@@ -173,13 +191,14 @@ export default class AddProductScreen extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 20,
     backgroundColor: '#fff'
   },
   img: {
+    borderWidth: 1,
+    borderColor: Colors.divider,
     width: '100%',
-    height: 170,
-    marginTop: 10
+    height: 300,
+    marginBottom: 15
   },
   input: {
     borderWidth: 1,

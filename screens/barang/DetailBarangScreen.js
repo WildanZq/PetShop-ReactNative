@@ -7,10 +7,6 @@ import {
   Icon
 } from "native-base";
 import { TouchableOpacity, ActivityIndicator } from 'react-native';
-import {
-  Grid,
-  Col
-} from 'react-native-easy-grid';
 import ImageView from 'react-native-image-view';
 import firebase from "../../Firebase";
 import NumberFormat from 'react-number-format';
@@ -234,8 +230,8 @@ export default class DetailBarangScreen extends React.Component {
             <Text style={[styles.textDefault, styles.semiBold]}>
               Deskripsi
             </Text>
-            <Text>
-              Makanan kucing Whiskas Tuna Premium ukuran 250 gram 100% original jaminan seller. lorem ipsum dolor sit amet lorem ipsum dolor sit amet lorem ipsum dolor sit amet lorem ipsum dolor sit amet...
+            <Text style={{ marginBottom: 15 }}>
+              { this.state.getBarang.deskripsi ? this.state.getBarang.deskripsi : 'Lorem ipsum dolor sit amet lorem ipsum dolor sit amet lorem ipsum dolor sit amet lorem ipsum dolor sit amet' }
             </Text>
           </View>
         </ScrollView>
