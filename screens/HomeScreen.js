@@ -41,6 +41,8 @@ export default class HomeScreen extends React.Component {
 
   static navigationOptions =  ({ navigation }) => {
       const {params = {}} = navigation.state;
+      const { navigate } = navigation;
+      
        return {
          headerStyle: {
            backgroundColor: Colors.primary,
@@ -64,7 +66,7 @@ export default class HomeScreen extends React.Component {
                </TouchableOpacity>
              </View>
              <View style={{ flex: .125, alignItems: 'center' }}>
-               <TouchableOpacity onPress={() => console.log('cart clicked')} >
+               <TouchableOpacity onPress={() => navigate('WishlistBarang')} >
                  <Icon
                    name='md-heart'
                    size={50}
