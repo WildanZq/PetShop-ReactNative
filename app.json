@@ -25,6 +25,9 @@
     "ios": {
       "supportsTablet": true
     },
+    "android": {
+      "package": "com.raion.petlover"
+    },
     "description": ""
   }
 }
