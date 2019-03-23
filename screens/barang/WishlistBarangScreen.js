@@ -1,28 +1,12 @@
 import React from 'react';
-import { AsyncStorage, Alert, ScrollView, FlatList } from "react-native";
-import {
-    View,
-    Text,
-    Container,
-    Header,
-    Content,
-    Card,
-    CardItem,
-    Body,
-    H3,
-    Right,
-    Icon,
-    Button,
-    Item,
-    Input,
-} from "native-base";
+import { AsyncStorage, ScrollView, FlatList } from "react-native";
 import firebase from "../../Firebase";
 import Colors from '../../constants/Colors';
-import NumberFormat from 'react-number-format';
+import ProductItem from "../../components/ProductItem";
 
 export default class WishlistBarangScreen extends React.Component {
     static navigationOptions = {
-        title: 'Wislist',
+        title: 'Wishlist',
         headerStyle: {
             backgroundColor: Colors.primary,
         },
@@ -45,40 +29,34 @@ export default class WishlistBarangScreen extends React.Component {
         const wishlist = [];
 
         querySnapshot.forEach(doc => {
-            let newItem = doc.data();
-            newItem.id = doc.id;
-            console.log(newItem.id)
+        let newItem = doc.data();
+        newItem.id = doc.id;
 
-            for(let i=0; i < newItem.barang.length; i++) {
-                newItem.barang[i].barangData.get()
-                .then(res => {
-                        const { title, image, kategori, harga } = res.data();
-                        newItem.barangData = res.data();
-                        
-                        wishlist.push({
-                            key: res.id,
-                            title,
-                            image, 
-                            kategori, 
-                            harga
-                        });
-                        this.setState({
-                            wishlist: wishlist
-                        });
-                        
-                        console.log(newItem.barangData.title)
+        if (newItem.barang != null) {
+            newItem.barang.get()
+            .then(res => {
+                newItem.barangData = res.data();
+                newItem.barangData.key = res.id;
+
+                if (newItem.barangData != null) {
+                wishlist.push(newItem);
+                this.setState({
+                    wishlist: wishlist
                 })
-                .catch(err => console.error(err));
-            }
+                console.log(newItem.barangData.title)
+                }
+            })
+            .catch(err => console.error(err));
+        } else {
+            wishlist.push(newItem);
+        }
         });
     };
 
     _showData = async () =>  {
         await AsyncStorage.getItem('userToken', (error, result) => {
             if (result) {
-                const userRef = firebase.firestore().collection('user').doc(result);
-
-                this.dataNya = firebase.firestore().collection('wishlist').where('user', '==', userRef);
+                this.dataNya = firebase.firestore().collection('wishlist').where('user', '==', result);
                 this.unsubscribe = this.dataNya.onSnapshot(this.onCollectionUpdate);
 
                 this.setState({
@@ -101,14 +79,19 @@ export default class WishlistBarangScreen extends React.Component {
     render() {
         return ( 
             <ScrollView>
-                <View>
                 <FlatList
-                    data={this.state.wishlist}
-                    renderItem={({ item }) => (
-                    <Text key={item.key}>{ item.title }</Text>
-                    )}
+                style={{ padding: 5 }}
+                data={this.state.wishlist}
+                keyExtractor={item => item.id}
+                renderItem={({ item }) => (
+                    <ProductItem
+                    navigation={this.props.navigation}
+                    data={item.barangData} />
+                )}
+                horizontal={false}
+                numColumns={2}
+                onEndThreshold={0}
                 />
-                </View>
             </ScrollView>
         );
     }

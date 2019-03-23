@@ -97,6 +97,7 @@ export default class DetailBarangScreen extends React.Component {
       isImageViewVisible: false,
       key: '',
       favourite: Colors.divider,
+      isAdded: false,
       isLoading: true
     };
   }
@@ -104,6 +105,23 @@ export default class DetailBarangScreen extends React.Component {
   componentDidMount() {
     const { params } = this.props.navigation.state;
     const boardKey = params ? params.boardKey : null;
+    const wishlistRef = firebase.firestore().collection('wishlist').doc(`${JSON.parse(boardKey)}${this.state.token}`);
+
+    wishlistRef.get().then((doc) => {
+      let dataDoc = doc.data();
+
+      if (doc.exists) {
+        if (dataDoc.user == this.state.token) {
+          this.setState({
+            isAdded: true,
+          });
+        }
+      } else {
+        this.setState({
+          isAdded: false,
+        });
+      }
+    });
 
     const ref = firebase.firestore().collection('boards').doc(`${JSON.parse(boardKey)}`);
     ref.get().then((doc) => {
@@ -172,7 +190,6 @@ export default class DetailBarangScreen extends React.Component {
 
   _doTransaksi = () => {
     this.ref = firebase.firestore().collection('penjualan');
-
     this.ref.add({
         barang: firebase.firestore().doc(`/boards/MxydAYw4Ese8KjVaai7Q`),
       })
@@ -190,27 +207,42 @@ export default class DetailBarangScreen extends React.Component {
     } else {
       this.setState({ favourite: 'red' });
     }
+    const wishlistRef = firebase.firestore().collection('wishlist').doc(`${this.state.key}${this.state.token}`);
+
+    wishlistRef.get().then((doc) => {
+      let dataDoc = doc.data();
+
+      if (doc.exists) {
+        if (dataDoc.user==this.state.token) {
+          this.setState({
+            isAdded: false,
+          });
+          wishlistRef.delete().then(() => {
+            console.log('sukses')
+          }).catch((error) => {
+            console.error("Error removing document: ", error);
+          });
+          Alert.alert('', 'Removed from Wishlist!');
+        }
+      } else {
+        this.setState({
+          isAdded: true,
+        });
+        firebase.firestore().collection('wishlist').doc(`${this.state.key}${this.state.token}`).set({
+            user: `${this.state.token}`,
+            barang: firebase.firestore().doc(`/boards/${this.state.key}`),
+          })
+          .catch((error) => {
+            console.error("Error adding user: ", error);
+          });
+        Alert.alert('', 'Added to Wishlist!');
+      }
+    });
   }
 
   render() {
-    const images = [
-        {
-            source: {
-                uri: this.state.getBarang.image,
-            },
-            title: 'IMG 1',
-            width: 806,
-            height: 720,
-        },
-    ];
-    const noImages = [
-        {
-            source: require('../../assets/images/no_img.jpeg'),
-            title: 'No Image',
-            width: 806,
-            height: 720,
-        },
-    ];
+    const images = [{source: {uri: this.state.getBarang.image,}, title: 'IMG 1', width: 806, height: 720,},];
+    const noImages = [{source: require('../../assets/images/no_img.jpeg'), title: 'No Image', width: 806, height: 720,},];
     const {isImageViewVisible, imageIndex} = this.state;
 
     if (this.state.isLoading)
@@ -247,12 +279,8 @@ export default class DetailBarangScreen extends React.Component {
             />
             <Button 
             onPress={() => {this.addToWishlist()} }
-            style={{ borderRadius: 50, backgroundColor: '#fff', position: 'absolute', bottom: 10, right: 15, width: 50, height: 50, padding: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
-              <Icon
-                name='md-heart'
-                size={56}
-                style={{ color: this.state.favourite, marginLeft: 0, marginRight: 0 }}
-              />
+            style={{ borderRadius: 50, backgroundColor: '#4fc3f7', position: 'absolute', bottom: 10, right: 15, width: 50, height: 50, padding: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
+              <Icon name='md-heart' size={56} style={{ color: this.state.isAdded? '#f44336': Colors.divider, marginLeft: 0, marginRight: 0 }}/>
             </Button>
           </View>
           <View style={styles.main}>

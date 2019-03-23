@@ -4,14 +4,14 @@ import {
   Text,
   Content,
   Card,
-  CardItem,
+  CardItem
 } from "native-base";
 import NumberFormat from 'react-number-format';
 import Colors from '../constants/Colors';
 
 const ProductItem = ({ navigation, data }) => {
   return (
-    <Content key={data.key} style={{ margin: 5 }}>
+    <Content style={{ margin: 5 }}>
       <TouchableOpacity
       onPress={() =>
         navigation.navigate("DetailBarang",

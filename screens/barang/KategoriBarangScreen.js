@@ -1,26 +1,11 @@
 import React from 'react';
-import { AsyncStorage, Alert, ActivityIndicator, FlatList, ScrollView } from "react-native";
-import {
-    View,
-    Text,
-    Container,
-    Header,
-    Content,
-    Card,
-    CardItem,
-    Body,
-    H3,
-    Right,
-    Icon,
-    Button,
-    Item,
-    Input,
-} from "native-base";
+import { ActivityIndicator, FlatList, ScrollView } from "react-native";
+import { View } from "native-base";
 import ProductItem from "../../components/ProductItem";
 import firebase from "../../Firebase";
 import Colors from '../../constants/Colors';
 
-export default class KategoriBarangScreen extends React.Component {
+export default class KategoriBarangScreen extends React.PureComponent {
     static navigationOptions = ({ navigation }) => {
       const {params = {}} = navigation.state;
         return {
@@ -80,13 +65,19 @@ export default class KategoriBarangScreen extends React.Component {
         return (<FlatList
         style={{ padding: 5 }}
         data={this.state.barang}
+        keyExtractor={item => item.key}
         renderItem={({ item }) => (
             <ProductItem
             navigation={this.props.navigation}
             data={item} />
         )}
-        horizontal={false}
         numColumns={2}
+        onEndReached={({ item }) => (
+            <ProductItem
+            navigation={this.props.navigation}
+            data={item} />
+        )}
+        onEndThreshold={0}
         />);
     }
 
