@@ -202,11 +202,6 @@ export default class DetailBarangScreen extends React.Component {
   }
 
   addToWishlist = () => {
-    if (this.state.favourite === 'red') {
-      this.setState({ favourite: Colors.divider });
-    } else {
-      this.setState({ favourite: 'red' });
-    }
     const wishlistRef = firebase.firestore().collection('wishlist').doc(`${this.state.key}${this.state.token}`);
 
     wishlistRef.get().then((doc) => {
@@ -218,11 +213,10 @@ export default class DetailBarangScreen extends React.Component {
             isAdded: false,
           });
           wishlistRef.delete().then(() => {
-            console.log('sukses')
+            Alert.alert('', 'Removed from Wishlist!');
           }).catch((error) => {
             console.error("Error removing document: ", error);
           });
-          Alert.alert('', 'Removed from Wishlist!');
         }
       } else {
         this.setState({
@@ -279,7 +273,7 @@ export default class DetailBarangScreen extends React.Component {
             />
             <Button 
             onPress={() => {this.addToWishlist()} }
-            style={{ borderRadius: 50, backgroundColor: '#4fc3f7', position: 'absolute', bottom: 10, right: 15, width: 50, height: 50, padding: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
+            style={{ borderRadius: 50, backgroundColor: '#fff', position: 'absolute', bottom: 10, right: 15, width: 50, height: 50, padding: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
               <Icon name='md-heart' size={56} style={{ color: this.state.isAdded? '#f44336': Colors.divider, marginLeft: 0, marginRight: 0 }}/>
             </Button>
           </View>
