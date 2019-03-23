@@ -4,9 +4,11 @@ import {
   StyleSheet,
   AsyncStorage,
   ActivityIndicator,
-  FlatList
+  ScrollView,
+  Alert
 } from 'react-native'
-import { View, Button, Text } from 'native-base'
+import { View, Button, Text } from 'native-base';
+import NumberFormat from 'react-number-format';
 import firebase from "../Firebase";
 import Colors from '../constants/Colors';
 
@@ -87,6 +89,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 12,
   },
+  cartItemBtn: {
+    height: 26,
+    width: 26,
+    paddingTop: 0,
+    paddingBottom: 0,
+    justifyContent: 'center'
+  }
 })
 
 export default class ProfileScreen extends Component {
@@ -103,7 +112,7 @@ export default class ProfileScreen extends Component {
       isLoading: true,
       getUser: {},
       key: '',
-      penjualan: []
+      barang: []
     };
 
     this.unsubscribe = null;
@@ -122,60 +131,121 @@ export default class ProfileScreen extends Component {
     });
   };
 
-  onCollectionUpdate = querySnapshot => {
-    const penjualan = [];
+  renderBarang = () => {
+    return this.state.barang.map(data => {
+      return (
+        <View style={{ borderWidth: 1, borderColor: Colors.divider, marginVertical: 5, flex: 1, marginHorizontal: 16 }} key={data.key}>
+          <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+            <Image
+              source={data.image ? { uri: data.image } : require('../assets/images/no_img.jpeg')}
+              style={{ height: 100, width: 100 }} />
+            <View style={{ flex: 1, marginLeft: 10 }}>
+              <Text style={{ fontWeight: 'bold' }}>{data.title}</Text>
+              <NumberFormat value={data.harga} displayType={'text'} thousandSeparator={'.'} decimalSeparator={','} prefix={'Rp '}
+                renderText={value => <Text>{value}</Text>}
+              />
+              <View style={{ flexDirection: 'row', marginVertical: 8, alignItems: 'center' }}>
+                <Text>Stok: </Text>
+                <Button onPress={() => this.subtractItemStock(data.key)} warning style={styles.cartItemBtn}>
+                  <Text style={{ color: '#fff', paddingLeft: 0, paddingRight: 0 }}>-</Text>
+                </Button>
+                <Text style={{ marginHorizontal: 8 }}>{data.stok}</Text>
+                <Button onPress={() => this.addItemStock(data.key)} success style={styles.cartItemBtn}>
+                  <Text style={{ color: '#fff', paddingLeft: 0, paddingRight: 0 }}>+</Text>
+                </Button>
+                <View style={{ marginLeft: 10 }}></View>
+                <Button onPress={() => this.removeItem(data.key)} danger style={styles.cartItemBtn}>
+                  <Text style={{ color: '#fff', paddingLeft: 0, paddingRight: 0 }}>x</Text>
+                </Button>
+              </View>
+            </View>
+          </View>
+        </View>
+      );
+    });
+  };
 
-    querySnapshot.forEach(doc => {
-      let newItem = doc.data();
-      newItem.id = doc.id;
-
-      if (newItem.barang != null) {
-        newItem.barang.get()
-          .then(res => {
-            newItem.barangData = res.data()
-
-            if (newItem.barangData != null) {
-              penjualan.push(newItem);
-              this.setState({
-                penjualan: penjualan
-              })
-              console.log(newItem.barangData.title)
-            }
-          })
-          .catch(err => console.error(err));
-      } else {
-        penjualan.push(newItem);
+  addItemStock = key => {
+    let data = this.state.barang;
+    let newStok = null;
+    data.map((val) => {
+      if (val.key === key) {
+        if (val.stok === 1) return;
+        newStok = 1 + val.stok;
       }
     });
+
+    const ref = firebase.firestore().collection('boards').doc(key);
+    ref.update({ stok: newStok });
+  };
+
+  subtractItemStock = key => {
+    let data = this.state.barang;
+    let newStok = null;
+    data.map((val) => {
+      if (val.key === key) {
+        if (val.stok === 1) return;
+        newStok = val.stok - 1;
+      }
+    });
+
+    const ref = firebase.firestore().collection('boards').doc(key);
+    ref.update({ stok: newStok });
+  };
+
+  removeItem = async key => {
+    const ref = firebase.firestore().collection('boards').doc(key);
+    let img = '';
+    await ref.get().then(doc => img = doc.data().image);
+    if (img) {
+      const pre = 'https://firebasestorage.googleapis.com/v0/b/coba-af1a4.appspot.com/o/images%2Fbarang%2F'.length;
+      const imgLoc = img.substring(pre, img.indexOf('?'));
+      let refImg = null;
+      if (refImg = await firebase.storage().ref().child(`images/barang/${imgLoc}`)) {
+        refImg.delete().then(() => 
+          ref.delete().then(() => Alert.alert('', 'Produk berhasil dihapus'))
+        );
+      } else {
+        ref.delete().then(() => Alert.alert('', 'Produk berhasil dihapus'));
+      }
+    } else {
+      ref.delete().then(() => Alert.alert('', 'Produk berhasil dihapus'));
+    }
   };
 
   _showData = async () =>  {
     await AsyncStorage.getItem('userToken', (error, result) => {
-        if (result) {
-          const userRef = firebase.firestore().collection('user').doc(result);
-
-          this.dataNya = firebase.firestore().collection('penjualan').where('pembeli', '==', userRef);
-          this.unsubscribe = this.dataNya.onSnapshot(this.onCollectionUpdate);
-
-          const ref = firebase.firestore().collection('user').doc(result);
-
-          ref.get().then((doc) => {
-            if (doc.exists) {
-              this.setState({
-                getUser: doc.data(),
-                key: result,
-                isLoading: false,
-              });
-            } else {
-              console.log("No such document!");
-            }
+      if (result) {
+        const transaksi = firebase.firestore().collection('boards').where('uid', '==', result);
+        transaksi.onSnapshot(doc => {
+          this.setState({ barang: [] });
+          let newData = [];
+          doc.docs.map(data => {
+            newData = this.state.barang;
+            newData.push({...data.data(), key: data.id});
+            this.setState({ barang: newData })
           });
-        }
-        else {
-          this.setState({
-            isLoading: false,
-          });
-        }
+        });
+
+        const ref = firebase.firestore().collection('user').doc(result);
+
+        ref.get().then((doc) => {
+          if (doc.exists) {
+            this.setState({
+              getUser: doc.data(),
+              key: result,
+              isLoading: false,
+            });
+          } else {
+            console.log("No such document!");
+          }
+        });
+      }
+      else {
+        this.setState({
+          isLoading: false,
+        });
+      }
     });
   };
 
@@ -213,35 +283,33 @@ export default class ProfileScreen extends Component {
 
   renderContactHeader = () => {
     return (
-      <View style={styles.headerContainer}>
-        <View style={styles.userRow}>
-          {this.renderImg()}
-          <View style={styles.userNameRow}>
-            <Text style={styles.userNameText}>{this.state.getUser.nama}</Text>
+      <ScrollView>
+        <View style={styles.headerContainer}>
+          <View style={styles.userRow}>
+            {this.renderImg()}
+            <View style={styles.userNameRow}>
+              <Text style={styles.userNameText}>{this.state.getUser.nama}</Text>
+            </View>
+            <View style={styles.userBioRow}>
+              <Text style={styles.userBioText}>{this.state.getUser.email}</Text>
+              <Text style={styles.userBioText}>{this.state.getUser.gender}</Text>
+              <Text style={styles.userBioText}>{this.state.getUser.tgl_lahir}</Text>
+            </View>
           </View>
-          <View style={styles.userBioRow}>
-            <Text style={styles.userBioText}>{this.state.getUser.email}</Text>
-            <Text style={styles.userBioText}>{this.state.getUser.gender}</Text>
-            <Text style={styles.userBioText}>{this.state.getUser.tgl_lahir}</Text>
+          <View style={styles.socialRow}>
+            <View>
+              <Button style={{ backgroundColor: Colors.accent, marginRight: 10 }} white rounded onPress={this.addProduct}><Text style={{ color: '#000' }}> Tambah Barang </Text></Button>
+            </View>
+            <View>
+              <Button rounded danger onPress={this._signOutAsync}><Text> Sign Out </Text></Button>
+            </View>
           </View>
-        </View>
-        <View style={styles.socialRow}>
-          <View>
-            <Button style={{ backgroundColor: Colors.accent, marginRight: 10 }} white rounded onPress={this.addProduct}><Text style={{ color: '#000' }}> Tambah Barang </Text></Button>
-          </View>
-          <View>
-            <Button rounded danger onPress={this._signOutAsync}><Text> Sign Out </Text></Button>
-          </View>
-        </View>
 
-        <FlatList
-            data={this.state.penjualan}
-            keyExtractor={(item, index) => item.id}
-            renderItem={({ item }) => (
-              <Text>{ item.barangData.title }</Text>
-            )}
-        />
-      </View>
+          <Text style={{ marginTop: 18, fontWeight: 'bold', fontSize: 16, marginBottom: 12 }}>Produk Anda</Text>
+
+          {this.renderBarang()}
+        </View>
+      </ScrollView>
     )
   }
   

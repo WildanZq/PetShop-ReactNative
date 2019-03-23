@@ -56,11 +56,11 @@ export default class AddProductScreen extends React.Component {
     return (
       <ScrollView style={styles.container}>
         {this.renderImg()}
-        <Button style={{ backgroundColor: '#fff', borderRadius: 50, width: 50, height: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'absolute', top: 275, right: 15 }} onPress={this.chooseImg}>
+        <Button style={{ backgroundColor: Colors.primary, borderRadius: 50, width: 50, height: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'absolute', top: 275, right: 15 }} onPress={this.chooseImg}>
           <Icon
             name='md-camera'
             size={56}
-            style={{ color: Colors.primary, marginLeft: 0, marginRight: 0 }}
+            style={{ color: '#fff', marginLeft: 0, marginRight: 0 }}
           />
         </Button>
         <View style={{ paddingHorizontal: 20 }}>
