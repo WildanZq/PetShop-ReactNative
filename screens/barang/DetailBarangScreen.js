@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
   },
   slideImage: {
     width: deviceWidth,
-    height: 300,
+    height: 300
   },
   sticky: {
     position: 'absolute',
@@ -96,6 +96,7 @@ export default class DetailBarangScreen extends React.Component {
       imageIndex: 0,
       isImageViewVisible: false,
       key: '',
+      favourite: Colors.divider,
       isLoading: true
     };
   }
@@ -184,6 +185,11 @@ export default class DetailBarangScreen extends React.Component {
   }
 
   addToWishlist = () => {
+    if (this.state.favourite === 'red') {
+      this.setState({ favourite: Colors.divider });
+    } else {
+      this.setState({ favourite: 'red' });
+    }
   }
 
   render() {
@@ -245,7 +251,7 @@ export default class DetailBarangScreen extends React.Component {
               <Icon
                 name='md-heart'
                 size={56}
-                style={{ color: Colors.divider, marginLeft: 0, marginRight: 0 }}
+                style={{ color: this.state.favourite, marginLeft: 0, marginRight: 0 }}
               />
             </Button>
           </View>
