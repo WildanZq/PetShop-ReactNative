@@ -5,9 +5,6 @@ import {
   Content,
   Card,
   CardItem,
-  Body,
-  Left,
-  Thumbnail,
   Button,
   Icon,
 } from "native-base";
@@ -15,7 +12,7 @@ import NumberFormat from 'react-number-format';
 
 const ProductItem = ({ navigation, data }) => {
   return (
-    <Content key={data.key} style={{ margin: 5 }}>
+    <Content style={{ margin: 5 }}>
       <TouchableOpacity
       onPress={() =>
         navigation.navigate("DetailBarang",

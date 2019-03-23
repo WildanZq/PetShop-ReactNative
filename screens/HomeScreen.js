@@ -21,7 +21,7 @@ import firebase from "../Firebase";
 import ProductItem from "../components/ProductItem";
 import SearchInput from '../components/SearchInput';
 
-export default class HomeScreen extends React.Component {
+export default class HomeScreen extends React.PureComponent {
   constructor() {
     super();
 
@@ -295,6 +295,7 @@ export default class HomeScreen extends React.Component {
     return (<FlatList
       style={{ padding: 5 }}
       data={this.state.boards}
+      keyExtractor={item => item.key}
       renderItem={({ item }) => (
         <ProductItem
           navigation={this.props.navigation}
@@ -302,6 +303,12 @@ export default class HomeScreen extends React.Component {
       )}
       horizontal={false}
       numColumns={2}
+      onEndReached={({ item }) => (
+        <ProductItem
+          navigation={this.props.navigation}
+          data={item} />
+      )}
+      onEndThreshold={0}
     />);
   }
 
